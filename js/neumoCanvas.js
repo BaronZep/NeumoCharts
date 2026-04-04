@@ -13,12 +13,12 @@ const SPAD  = 48; // marge canvas pour ombre portée de la carte
 
 
 // ── Tailles de police (en px logiques, modifier ici pour tout changer) ──────
-const FS_TITLE   = 25;   // titre principal du graphique
+const FS_TITLE   = 17;   // titre principal du graphique
 const FS_XLABEL  = 12;   // étiquettes axe X
-const FS_XTITLE  = 16;   // titre axe X
-const FS_YTITLE  = 16;   // titre axe Y
+const FS_XTITLE  = 12;   // titre axe X
+const FS_YTITLE  = 12;   // titre axe Y
 const FS_YAXIS   = 11;   // valeurs axe Y
-const FS_LEGEND  = 11.5; // légende (multi-séries)
+const FS_LEGEND  = 13; // légende (multi-séries)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utilitaires Canvas
@@ -161,7 +161,7 @@ function drawXTitle(ctx, title, cx, oy) {
   ctx.save();
   ctx.font=`700 ${FS_XTITLE}px "${FONT}",sans-serif`;
   ctx.fillStyle=TC; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(title, cx, oy + RAIL_H + 14 + 18);
+  ctx.fillText(title, cx, oy + RAIL_H + 14 + 28);
   ctx.restore();
 }
 
@@ -209,8 +209,8 @@ function calcLayout(nBars, hasYTitle, hasXTitle, hasLegend, nSeries=1, barWOverr
   const barsW  = CELL_W * nBars;
   const zoneW  = spacerW + barsW + ZPPAD*2;
   const xRowH  = 22;
-  const xTtlH  = hasXTitle ? 20 : 0;
-  const legendH= (hasLegend && nSeries>1) ? 28 : 0;
+  const xTtlH  = hasXTitle ? 30 : 0;
+  const legendH= (hasLegend && nSeries>1) ? 44 : 0;
   const titleH = 24;
   // FIX 2 — zoneH englobe maintenant les labels X et le titre X
   // → tout le contenu de l'axe X est dessiné dans le carré intérieur
@@ -279,8 +279,8 @@ function buildCanvas(L, cfg, drawContent) {
 
   // Légende (en dehors du carré intérieur, sous la zone)
   if (L._series) {
-    // FIX 2 — legendY ne ré-ajoute plus xRowH/xTtlH (déjà dans zoneH)
-    const legendY = zY + L.zoneH + 14;
+    // Légende positionnée hors de l'ombre portée inférieure de la zone (oy+blur ≈ 26px)
+    const legendY = zY + L.zoneH + 30;
     drawLegend(ctx, L._series, L._colors, zX, L.zoneW, legendY);
   }
 
@@ -373,7 +373,7 @@ export function renderGroupedCanvas({ headers, rows }, cfg) {
   const spacerW=(hasYT?Y_TTL_W:0)+Y_AX_W;
   const barsW=CELL_W*data.length;
   const zoneW=spacerW+barsW+ZPPAD*2;
-  const xRowH=22, xTtlH=cfg.xTitle?20:0, legendH=series.length>1?28:0;
+  const xRowH=22, xTtlH=cfg.xTitle?30:0, legendH=series.length>1?44:0;
   // FIX 2 — même logique que calcLayout : zoneH englobe xRowH et xTtlH
   const zoneH=RAIL_H+ZPPAD*2+xRowH+xTtlH;
   const totalW=PAD*2+zoneW+SPAD*2;
