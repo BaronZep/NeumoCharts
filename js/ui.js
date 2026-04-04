@@ -1,11 +1,17 @@
+/**
+ * ui.js
+ * Wires DOM events to chart rendering logic.
+ * Manages chart type selection, palette selection, CSV input (paste or file),
+ * chart generation, canvas preview, and PNG export.
+ */
 import { CSV_PLACEHOLDERS, PALETTES, DEFAULT_PALETTE } from './constants.js';
 import { parseCSV } from './csv.js';
 import { renderHistogramCanvas, renderStackedCanvas, renderGroupedCanvas, renderLineCanvas, canvasToDataURL } from './neumoCanvas.js';
 
-let chartType   = 'histogram';
-let paletteKey  = DEFAULT_PALETTE;
-let lastCanvas  = null;
-let importedName = null; // nom du fichier CSV importé (sans extension), null si saisie manuelle
+let chartType    = 'histogram';
+let paletteKey   = DEFAULT_PALETTE;
+let lastCanvas   = null;
+let importedName = null; // basename of the last imported CSV file; null when data was typed manually
 
 export function showToast(msg) {
   const t = document.getElementById('toast');
@@ -33,14 +39,15 @@ export function setPalette(key) {
   paletteKey = PALETTES[key] ? key : DEFAULT_PALETTE;
 }
 
+/**
+ * Read a CSV file from the file input, pre-fill the title field with its
+ * basename, and load its content into the textarea.
+ */
 export function loadFile(e) {
   const f = e.target.files[0];
   if (!f) return;
-  // Stocker le nom sans extension
-  importedName = f.name.replace(/\.csv$/i, '').replace(/\.txt$/i, '');
-  // Pré-remplir le titre avec le nom du fichier
-  const titleInput = document.getElementById('cfgTitle');
-  titleInput.value = importedName;
+  importedName = f.name.replace(/\.(csv|txt)$/i, '');
+  document.getElementById('cfgTitle').value = importedName;
   const reader = new FileReader();
   reader.onload = ev => { document.getElementById('csvInput').value = ev.target.result; };
   reader.readAsText(f);
@@ -59,7 +66,7 @@ export function generate() {
     title:  document.getElementById('cfgTitle').value.trim()  || 'Mon graphique',
     xTitle: document.getElementById('cfgXTitle').value.trim(),
     yTitle: document.getElementById('cfgYTitle').value.trim(),
-    colors: PALETTES[paletteKey] || PALETTES[DEFAULT_PALETTE],
+    colors:  PALETTES[paletteKey] || PALETTES[DEFAULT_PALETTE],
     palette: paletteKey,
   };
 
@@ -78,6 +85,7 @@ export function generate() {
   document.getElementById('dlBtn').disabled = false;
 }
 
+/** Download the last rendered chart as a PNG named after the source CSV or 'manual'. */
 export function downloadPNG() {
   if (!lastCanvas) { showToast('Générez d\'abord un graphique !'); return; }
   const a = document.createElement('a');
@@ -96,14 +104,18 @@ export function init() {
   document.getElementById('importBtn').addEventListener('click', () => {
     document.getElementById('fileInput').click();
   });
+
   const paletteSelect = document.getElementById('cfgPalette');
   if (paletteSelect) {
     paletteSelect.value = DEFAULT_PALETTE;
     paletteSelect.addEventListener('change', e => setPalette(e.target.value));
   }
-  // Si l'utilisateur édite le CSV à la main, on repasse en mode "manual"
+
+  // Manual edits to the textarea clear the imported filename so the PNG is
+  // saved as 'manual.png' rather than the stale file name.
   document.getElementById('csvInput').addEventListener('input', () => {
     importedName = null;
   });
+
   updatePlaceholder(chartType);
 }
