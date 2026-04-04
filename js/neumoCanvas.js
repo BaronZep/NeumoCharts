@@ -13,12 +13,12 @@ const SPAD  = 48; // marge canvas pour ombre portée de la carte
 
 
 // ── Tailles de police (en px logiques, modifier ici pour tout changer) ──────
-const FS_TITLE   = 17;   // titre principal du graphique
+const FS_TITLE   = 25;   // titre principal du graphique
 const FS_XLABEL  = 12;   // étiquettes axe X
-const FS_XTITLE  = 12;   // titre axe X
-const FS_YTITLE  = 12;   // titre axe Y
+const FS_XTITLE  = 16;   // titre axe X
+const FS_YTITLE  = 16;   // titre axe Y
 const FS_YAXIS   = 11;   // valeurs axe Y
-const FS_LEGEND  = 11.5; // légende (multi-séries)
+const FS_LEGEND  = 13; // légende (multi-séries)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utilitaires Canvas
@@ -210,12 +210,11 @@ function calcLayout(nBars, hasYTitle, hasXTitle, hasLegend, nSeries=1, barWOverr
   const zoneW  = spacerW + barsW + ZPPAD*2;
   const xRowH  = 22;
   const xTtlH  = hasXTitle ? 30 : 0;
-  const legendH= (hasLegend && nSeries>1) ? 40 : 0; // dans la zone
+  const legendH= (hasLegend && nSeries>1) ? 44 : 0;
   const titleH = 24;
-  // zoneH englobe labels X, titre X ET la légende → tout dans le carré intérieur
-  const zoneH  = RAIL_H + ZPPAD*2 + xRowH + xTtlH + legendH;
+  const zoneH  = RAIL_H + ZPPAD*2 + xRowH + xTtlH;
   const totalW = PAD*2 + zoneW + SPAD*2;
-  const totalH = PAD + GAP + titleH + GAP + zoneH + PAD + SPAD*2;
+  const totalH = PAD + GAP + titleH + GAP + zoneH + legendH + PAD + SPAD*1.5;
   return {BAR_W, CELL_W, spacerW, yTtlW, barsW, zoneW, zoneH,
           titleH, totalW, totalH, xRowH, xTtlH, legendH, spad: SPAD};
 }
@@ -276,8 +275,8 @@ function buildCanvas(L, cfg, drawContent) {
   if (cfg.xTitle) drawXTitle(ctx, cfg.xTitle, ox+L.barsW/2, oy);
 
   // Légende à l'intérieur de la zone (évite l'ombre portée)
-  if (L._series && L.legendH > 0) {
-    const legendY = zY + L.zoneH - L.legendH/2;
+  if (L._series) {
+    const legendY = zY + L.zoneH + 30;
     drawLegend(ctx, L._series, L._colors, zX, L.zoneW, legendY);
   }
 
