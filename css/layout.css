@@ -25,6 +25,8 @@
   grid-template-columns: 300px 1fr;
   gap: 20px;
   min-height: 0;
+  align-items: stretch;
+  height: 100%;
 }
 
 @media (max-width: 768px) {

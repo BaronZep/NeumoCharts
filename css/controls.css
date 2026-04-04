@@ -4,6 +4,8 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .section-label {
@@ -99,6 +101,7 @@ textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
 
 /* Generate button */
 .gen-btn {
+  margin-top: auto; /* colle le bouton en bas du panel */
   width: 100%;
   padding: 13px;
   border-radius: var(--r-md);

@@ -18,7 +18,7 @@ const FS_XLABEL  = 12;   // étiquettes axe X
 const FS_XTITLE  = 12;   // titre axe X
 const FS_YTITLE  = 12;   // titre axe Y
 const FS_YAXIS   = 11;   // valeurs axe Y
-const FS_LEGEND  = 13; // légende (multi-séries)
+const FS_LEGEND  = 11.5; // légende (multi-séries)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utilitaires Canvas
@@ -210,14 +210,12 @@ function calcLayout(nBars, hasYTitle, hasXTitle, hasLegend, nSeries=1, barWOverr
   const zoneW  = spacerW + barsW + ZPPAD*2;
   const xRowH  = 22;
   const xTtlH  = hasXTitle ? 30 : 0;
-  const legendH= (hasLegend && nSeries>1) ? 44 : 0;
+  const legendH= (hasLegend && nSeries>1) ? 40 : 0; // dans la zone
   const titleH = 24;
-  // FIX 2 — zoneH englobe maintenant les labels X et le titre X
-  // → tout le contenu de l'axe X est dessiné dans le carré intérieur
-  const zoneH  = RAIL_H + ZPPAD*2 + xRowH + xTtlH;
-  // totalH n'ajoute plus xRowH/xTtlH séparément (ils sont dans zoneH)
+  // zoneH englobe labels X, titre X ET la légende → tout dans le carré intérieur
+  const zoneH  = RAIL_H + ZPPAD*2 + xRowH + xTtlH + legendH;
   const totalW = PAD*2 + zoneW + SPAD*2;
-  const totalH = PAD + GAP + titleH + GAP + zoneH + legendH + PAD + SPAD*2;
+  const totalH = PAD + GAP + titleH + GAP + zoneH + PAD + SPAD*2;
   return {BAR_W, CELL_W, spacerW, yTtlW, barsW, zoneW, zoneH,
           titleH, totalW, totalH, xRowH, xTtlH, legendH, spad: SPAD};
 }
@@ -277,10 +275,9 @@ function buildCanvas(L, cfg, drawContent) {
   // Titre axe X — toujours à oy+RAIL_H+32, maintenant dans le carré
   if (cfg.xTitle) drawXTitle(ctx, cfg.xTitle, ox+L.barsW/2, oy);
 
-  // Légende (en dehors du carré intérieur, sous la zone)
-  if (L._series) {
-    // Légende positionnée hors de l'ombre portée inférieure de la zone (oy+blur ≈ 26px)
-    const legendY = zY + L.zoneH + 30;
+  // Légende à l'intérieur de la zone (évite l'ombre portée)
+  if (L._series && L.legendH > 0) {
+    const legendY = zY + L.zoneH - L.legendH/2;
     drawLegend(ctx, L._series, L._colors, zX, L.zoneW, legendY);
   }
 
@@ -373,11 +370,11 @@ export function renderGroupedCanvas({ headers, rows }, cfg) {
   const spacerW=(hasYT?Y_TTL_W:0)+Y_AX_W;
   const barsW=CELL_W*data.length;
   const zoneW=spacerW+barsW+ZPPAD*2;
-  const xRowH=22, xTtlH=cfg.xTitle?30:0, legendH=series.length>1?44:0;
-  // FIX 2 — même logique que calcLayout : zoneH englobe xRowH et xTtlH
-  const zoneH=RAIL_H+ZPPAD*2+xRowH+xTtlH;
+  const xRowH=22, xTtlH=cfg.xTitle?30:0, legendH=series.length>1?40:0;
+  // zoneH englobe xRowH, xTtlH ET legendH → tout dans le carré intérieur
+  const zoneH=RAIL_H+ZPPAD*2+xRowH+xTtlH+legendH;
   const totalW=PAD*2+zoneW+SPAD*2;
-  const totalH=PAD+GAP+24+GAP+zoneH+legendH+PAD+SPAD*2;
+  const totalH=PAD+GAP+24+GAP+zoneH+PAD+SPAD*2;
   const L={BAR_W:BW, CELL_W, spacerW, yTtlW:hasYT?Y_TTL_W:0, barsW, zoneW, zoneH,
            titleH:24, totalW, totalH, xRowH, xTtlH, legendH, spad: SPAD,
            _xLabels:data.map(d=>fmtX(d.x)), _series:series, _colors:colors};
