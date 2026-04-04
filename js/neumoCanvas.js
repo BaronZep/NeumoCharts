@@ -1,5 +1,5 @@
 // neumoCanvas.js — rendu Canvas 2D fidèle au style HTML/CSS original
-import { COLORS, RAIL_H, Y_TICKS, Y_AX_W, Y_TTL_W, GRP_GAP, SD, SL, TC } from './constants.js';
+import { COLORS, PALETTES, DEFAULT_PALETTE, RAIL_H, Y_TICKS, Y_AX_W, Y_TTL_W, GRP_GAP, SD, SL, TC } from './constants.js';
 import { niceIntTicks, fmtX } from './utils.js';
 
 const BG    = '#F0F0F3'; // doit correspondre à constants.js BG
@@ -291,7 +291,8 @@ function buildCanvas(L, cfg, drawContent) {
 
 export function renderHistogramCanvas({ headers, rows }, cfg) {
   const [nomAxe, nomSerie] = headers;
-  const color = COLORS[0];
+  const palette = cfg.colors || COLORS;
+  const color = palette[0];
   const data  = rows.map(r => ({ x: r[nomAxe], v: parseFloat(r[nomSerie])||0 }));
   const maxV  = Math.max(...data.map(d=>d.v), 0);
   const ticks = niceIntTicks(0, maxV, Y_TICKS);
@@ -319,7 +320,8 @@ export function renderHistogramCanvas({ headers, rows }, cfg) {
 
 export function renderStackedCanvas({ headers, rows }, cfg) {
   const nomAxe=headers[0], series=headers.slice(1);
-  const colors=series.map((_,i)=>COLORS[i%COLORS.length]);
+  const palette=cfg.colors||COLORS;
+  const colors=series.map((_,i)=>palette[i%palette.length]);
   const BAR_W=Math.max(28,Math.min(56,Math.floor(700/rows.length)));
   const data=rows.map(r=>({ x:r[nomAxe], values:series.map(s=>parseFloat(r[s])||0) }));
   const maxTot=Math.max(...data.map(d=>d.values.reduce((a,b)=>a+b,0)),0);
@@ -354,7 +356,8 @@ export function renderStackedCanvas({ headers, rows }, cfg) {
 
 export function renderGroupedCanvas({ headers, rows }, cfg) {
   const nomAxe=headers[0], series=headers.slice(1);
-  const colors=series.map((_,i)=>COLORS[i%COLORS.length]);
+  const palette=cfg.colors||COLORS;
+  const colors=series.map((_,i)=>palette[i%palette.length]);
   const BW=15, BGAP=3;
   const grpW=series.length*BW+(series.length-1)*BGAP;
   const CELL_W=grpW+GRP_GAP;

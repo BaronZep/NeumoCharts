@@ -113,3 +113,35 @@ textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
 }
 .gen-btn:hover  { box-shadow: 7px 7px 14px var(--sd), -7px -7px 14px var(--sl); }
 .gen-btn:active { box-shadow: inset 3px 3px 6px var(--sd), inset -3px -3px 6px var(--sl); transform: scale(.99); }
+
+
+.field select {
+  display: block;
+  width: 100%;
+  padding: 7px 32px 7px 8px;
+  font-size: 13px;
+  border-radius: calc(var(--r-sm) - 2px);
+  color: var(--text);
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+}
+.field select:focus-visible { outline: none; }
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 12px;
+  pointer-events: none;
+}
+.select-wrap:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-radius: var(--r-sm);
+}

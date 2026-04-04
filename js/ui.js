@@ -1,8 +1,9 @@
-import { CSV_PLACEHOLDERS } from './constants.js';
+import { CSV_PLACEHOLDERS, PALETTES, DEFAULT_PALETTE } from './constants.js';
 import { parseCSV } from './csv.js';
 import { renderHistogramCanvas, renderStackedCanvas, renderGroupedCanvas, canvasToDataURL } from './neumoCanvas.js';
 
 let chartType = 'histogram';
+let paletteKey = DEFAULT_PALETTE;
 let lastCanvas = null;
 
 export function showToast(msg) {
@@ -27,6 +28,10 @@ export function setType(type, btn) {
   updatePlaceholder(type);
 }
 
+export function setPalette(key) {
+  paletteKey = PALETTES[key] ? key : DEFAULT_PALETTE;
+}
+
 export function loadFile(e) {
   const f = e.target.files[0];
   if (!f) return;
@@ -48,6 +53,8 @@ export function generate() {
     title:  document.getElementById('cfgTitle').value.trim()  || 'Mon graphique',
     xTitle: document.getElementById('cfgXTitle').value.trim(),
     yTitle: document.getElementById('cfgYTitle').value.trim(),
+    colors: PALETTES[paletteKey] || PALETTES[DEFAULT_PALETTE],
+    palette: paletteKey,
   };
 
   let canvas;
@@ -82,5 +89,10 @@ export function init() {
   document.getElementById('importBtn').addEventListener('click', () => {
     document.getElementById('fileInput').click();
   });
+  const paletteSelect = document.getElementById('cfgPalette');
+  if (paletteSelect) {
+    paletteSelect.value = DEFAULT_PALETTE;
+    paletteSelect.addEventListener('change', e => setPalette(e.target.value));
+  }
   updatePlaceholder(chartType);
 }
