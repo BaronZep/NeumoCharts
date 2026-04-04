@@ -1,3 +1,2 @@
 import { init } from './ui.js';
-
-document.addEventListener('DOMContentLoaded', init);
+document.fonts.ready.then(() => init());

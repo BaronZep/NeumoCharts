@@ -1,12 +1,10 @@
 import { CSV_PLACEHOLDERS } from './constants.js';
 import { parseCSV } from './csv.js';
-import { renderHistogram, renderStacked, renderGrouped } from './chartBuilder.js';
-import { downloadChart, copyChart } from './export.js';
+import { renderHistogramCanvas, renderStackedCanvas, renderGroupedCanvas, canvasToDataURL } from './neumoCanvas.js';
 
-/* ── state ───────────────────────────────────────────────────────────── */
 let chartType = 'histogram';
+let lastCanvas = null;
 
-/* ── toast ───────────────────────────────────────────────────────────── */
 export function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -14,11 +12,8 @@ export function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* ── type selector ───────────────────────────────────────────────────── */
 function updatePlaceholder(type) {
-  const ta = document.getElementById('csvInput');
-  // Only update placeholder; never overwrite user-typed content
-  ta.placeholder = CSV_PLACEHOLDERS[type] ?? '';
+  document.getElementById('csvInput').placeholder = CSV_PLACEHOLDERS[type] ?? '';
 }
 
 export function setType(type, btn) {
@@ -32,7 +27,6 @@ export function setType(type, btn) {
   updatePlaceholder(type);
 }
 
-/* ── file import ─────────────────────────────────────────────────────── */
 export function loadFile(e) {
   const f = e.target.files[0];
   if (!f) return;
@@ -42,7 +36,6 @@ export function loadFile(e) {
   e.target.value = '';
 }
 
-/* ── generate ────────────────────────────────────────────────────────── */
 export function generate() {
   const csvText = document.getElementById('csvInput').value.trim();
   if (!csvText) { showToast("Collez d'abord un CSV !"); return; }
@@ -57,38 +50,37 @@ export function generate() {
     yTitle: document.getElementById('cfgYTitle').value.trim(),
   };
 
-  let html;
+  let canvas;
   try {
-    if      (chartType === 'histogram') html = renderHistogram(parsed, cfg);
-    else if (chartType === 'stacked')   html = renderStacked(parsed, cfg);
-    else                                html = renderGrouped(parsed, cfg);
+    if      (chartType === 'histogram') canvas = renderHistogramCanvas(parsed, cfg);
+    else if (chartType === 'stacked')   canvas = renderStackedCanvas(parsed, cfg);
+    else                                canvas = renderGroupedCanvas(parsed, cfg);
   } catch (e) { showToast('Erreur : ' + e.message); return; }
 
-  document.getElementById('previewArea').innerHTML = html;
-  document.getElementById('copyBtn').disabled = false;
-  document.getElementById('dlBtn').disabled   = false;
+  lastCanvas = canvas;
+  const area = document.getElementById('previewArea');
+  area.innerHTML = '';
+  area.appendChild(canvas);
+  document.getElementById('dlBtn').disabled = false;
 }
 
-/* ── init ────────────────────────────────────────────────────────────── */
+export function downloadPNG() {
+  if (!lastCanvas) { showToast('Générez d\'abord un graphique !'); return; }
+  const a = document.createElement('a');
+  a.download = 'neumo-chart.png';
+  a.href = canvasToDataURL(lastCanvas);
+  a.click();
+}
+
 export function init() {
-  // Bind type buttons
   document.querySelectorAll('.type-btn').forEach(btn => {
     btn.addEventListener('click', () => setType(btn.dataset.type, btn));
   });
-
-  // Bind generate button
   document.getElementById('generateBtn').addEventListener('click', generate);
-
-  // Bind export buttons
-  document.getElementById('copyBtn').addEventListener('click', copyChart);
-  document.getElementById('dlBtn').addEventListener('click', downloadChart);
-
-  // Bind file import
+  document.getElementById('dlBtn').addEventListener('click', downloadPNG);
   document.getElementById('fileInput').addEventListener('change', loadFile);
   document.getElementById('importBtn').addEventListener('click', () => {
     document.getElementById('fileInput').click();
   });
-
-  // Set initial placeholder
   updatePlaceholder(chartType);
 }

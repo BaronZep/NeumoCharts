@@ -18,7 +18,6 @@
 <body>
 <div class="app">
 
-  <!-- ── Header ───────────────────────────────────────────────── -->
   <header class="app-header">
     <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-label="Neumo Charts logo">
       <rect width="30" height="30" rx="9" fill="#9E68D2" opacity=".12"/>
@@ -31,10 +30,8 @@
 
   <div class="app-body">
 
-    <!-- ── Controls ─────────────────────────────────────────────── -->
     <aside class="panel raised" role="complementary" aria-label="Paramètres">
 
-      <!-- CSV input -->
       <div>
         <p class="section-label">Données CSV</p>
         <div class="csv-wrapper inset">
@@ -47,7 +44,6 @@
         </div>
       </div>
 
-      <!-- Chart type -->
       <div>
         <p class="section-label">Type de graphique</p>
         <div class="type-selector" role="radiogroup" aria-label="Type de graphique">
@@ -66,7 +62,6 @@
         </div>
       </div>
 
-      <!-- Config -->
       <div class="fields">
         <p class="section-label">Configuration</p>
         <div class="field">
@@ -92,7 +87,6 @@
       <button class="gen-btn raised" id="generateBtn">Générer →</button>
     </aside>
 
-    <!-- ── Preview ───────────────────────────────────────────────── -->
     <main class="preview raised" id="previewPanel" aria-label="Aperçu du graphique">
       <div class="preview-area" id="previewArea">
         <div class="empty-state" aria-hidden="true">
@@ -106,14 +100,6 @@
         </div>
       </div>
       <div class="preview-bar">
-        <button class="act-btn raised-sm" id="copyBtn" disabled
-          aria-label="Copier le graphique dans le presse-papier">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5">
-            <rect x="9" y="9" width="13" height="13" rx="2"/>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>Copier
-        </button>
         <button class="act-btn raised-sm" id="dlBtn" disabled
           aria-label="Télécharger le graphique en PNG">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
@@ -130,7 +116,6 @@
 </div>
 
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
-
 <script type="module" src="./js/main.js"></script>
 </body>
 </html>

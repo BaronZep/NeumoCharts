@@ -33,7 +33,7 @@ function buildXTitle(title, spacerW) {
 function buildYTitle(title) {
   if (!title) return '';
   return `<div style="width:${Y_TTL_W}px;height:${RAIL_H}px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
-    <span style="writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);font-size:12px;font-weight:700;color:${TC};white-space:nowrap;font-family:'DM Sans',sans-serif">${title}</span>
+    <span style="writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);font-size:12px;font-weight:700;color:${TC};white-space:nowrap;font-family:'DM Sans',sans-serif">${title}</span>
   </div>`;
 }
 
@@ -76,7 +76,7 @@ export function renderHistogram({ headers, rows }, cfg) {
     const hPct = (d.v / span) * 100;
     const bar  = `<div style="position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:65%;height:${hPct.toFixed(2)}%;background:${color};border-radius:9px 9px 3px 3px;box-shadow:2px 2px 4px ${SD},-2px -2px 4px ${SL}"></div>`;
     rails += `<div style="width:${CELL_W}px;flex-shrink:0">
-      <div class="chart-rail" style="width:${BAR_W}px;height:${RAIL_H}px;overflow:hidden">${grid}${bar}</div>
+      <div class="chart-rail" style="width:${BAR_W}px;height:${RAIL_H}px">${grid}${bar}</div>
     </div>`;
   }
 
@@ -121,7 +121,7 @@ export function renderStacked({ headers, rows }, cfg) {
       botPct += hPct;
     });
     rails += `<div style="width:${CELL_W}px;flex-shrink:0">
-      <div class="chart-rail" style="width:${BAR_W}px;height:${RAIL_H}px;overflow:hidden">${segs}</div>
+      <div class="chart-rail" style="width:${BAR_W}px;height:${RAIL_H}px">${segs}</div>
     </div>`;
   }
 
@@ -169,7 +169,7 @@ export function renderGrouped({ headers, rows }, cfg) {
       bars += `<div style="position:absolute;bottom:${botPct.toFixed(2)}%;height:${hPct.toFixed(2)}%;left:${leftPx}px;width:${BAR_W}px;background:${colors[i]};border-radius:${br};box-shadow:1px 1px 2px ${SD},-1px -1px 2px ${SL}"></div>`;
     });
     rails += `<div style="width:${CELL_W}px;flex-shrink:0">
-      <div class="chart-rail" style="width:${grpW}px;height:${RAIL_H}px;overflow:hidden">${bars}</div>
+      <div class="chart-rail" style="width:${grpW}px;height:${RAIL_H}px">${bars}</div>
     </div>`;
   }
 
