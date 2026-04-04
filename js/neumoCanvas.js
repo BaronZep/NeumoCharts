@@ -2,13 +2,14 @@
 import { COLORS, RAIL_H, Y_TICKS, Y_AX_W, Y_TTL_W, GRP_GAP, SD, SL, TC } from './constants.js';
 import { niceIntTicks, fmtX } from './utils.js';
 
-const BG    = '#e6e6ea';
+const BG    = '#F0F0F3'; // doit correspondre à constants.js BG
 const SD2   = '#d1d5d9';
 const SCALE = 2;
 const FONT  = 'DM Sans';
 const PAD   = 48;
 const GAP   = 14;
 const ZPPAD = 18;
+const SPAD  = 48; // marge canvas pour ombre portée de la carte
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utilitaires Canvas
@@ -33,7 +34,7 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-/** Neumorphique raised : reproduit box-shadow: Xpx Xpx Ypx SD, -Xpx -Xpx Ypx SL */
+/** Neumorphique raised */
 function neumoRaised(ctx, x, y, w, h, r, ox=10, oy=10, blur=24, bg=BG) {
   ctx.save();
   ctx.shadowColor=SD2; ctx.shadowOffsetX=ox; ctx.shadowOffsetY=oy; ctx.shadowBlur=blur;
@@ -47,38 +48,51 @@ function neumoRaised(ctx, x, y, w, h, r, ox=10, oy=10, blur=24, bg=BG) {
 }
 
 /**
- * Neumorphique inset : reproduit
- *   box-shadow: inset 4px 4px 8px SD2, inset -4px -4px 8px SL
+ * FIX 1 — Neumorphique inset via DÉGRADÉS LINÉAIRES.
  *
- * Technique : on dessine d'abord le fond BG, puis on clipe dans la forme et on
- * projette deux ombres portées de l'extérieur vers l'intérieur via des rects
- * qui débordent légèrement, créant visuellement l'effet inset.
+ * L'approche shadow+clip est incompatible avec ctx.scale() car les
+ * shadowOffset ne sont pas transformés par la CTM. On remplace donc
+ * par 4 dégradés (top/left sombre, bottom/right clair) clipés dans la forme.
  */
 function neumoInset(ctx, x, y, w, h, r) {
   // Fond de base
   roundRect(ctx, x, y, w, h, r);
   ctx.fillStyle = BG; ctx.fill();
 
-  // Ombre inset : clipé dans la forme, 4 passes de shadow portée depuis chaque bord
-  const OX = 8, BL = 12;
+  const D = 14; // correspond à inset 4px offset + 8px blur du CSS Python
 
-  // Haut+Gauche : ombre sombre projetée vers l'intérieur
   ctx.save();
-  roundRect(ctx, x, y, w, h, r); ctx.clip();
-  ctx.shadowColor = SD2; ctx.shadowBlur = BL;
-  ctx.shadowOffsetX = OX; ctx.shadowOffsetY = OX;
-  // rect hors-champ en haut-gauche, l'ombre tombe vers l'intérieur
-  ctx.fillStyle = BG;
-  ctx.fillRect(x - w - OX, y - h - OX, w, h);
-  ctx.restore();
+  roundRect(ctx, x, y, w, h, r);
+  ctx.clip();
 
-  // Bas+Droite : lumière projetée vers l'intérieur
-  ctx.save();
-  roundRect(ctx, x, y, w, h, r); ctx.clip();
-  ctx.shadowColor = SL; ctx.shadowBlur = BL;
-  ctx.shadowOffsetX = -OX; ctx.shadowOffsetY = -OX;
-  ctx.fillStyle = BG;
-  ctx.fillRect(x + w + OX*2, y + h + OX*2, w, h);
+  // Ombre sombre — bord haut
+  let g = ctx.createLinearGradient(x, y, x, y + D);
+  g.addColorStop(0, 'rgba(209,213,217,0.9)'); // correspond à SD #d1d5d9
+  g.addColorStop(1, 'rgba(209,213,217,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(x, y, w, D);
+
+  // Ombre sombre — bord gauche
+  g = ctx.createLinearGradient(x, y, x + D, y);
+  g.addColorStop(0, 'rgba(209,213,217,0.9)'); // correspond à SD #d1d5d9
+  g.addColorStop(1, 'rgba(209,213,217,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(x, y, D, h);
+
+  // Lumière — bord bas
+  g = ctx.createLinearGradient(x, y + h - D, x, y + h);
+  g.addColorStop(0, 'rgba(255,255,255,0)');
+  g.addColorStop(1, 'rgba(255,255,255,0.80)'); // SL #ffffff, légèrement atténué
+  ctx.fillStyle = g;
+  ctx.fillRect(x, y + h - D, w, D);
+
+  // Lumière — bord droit
+  g = ctx.createLinearGradient(x + w - D, y, x + w, y);
+  g.addColorStop(0, 'rgba(255,255,255,0)');
+  g.addColorStop(1, 'rgba(255,255,255,0.80)'); // SL #ffffff, légèrement atténué
+  ctx.fillStyle = g;
+  ctx.fillRect(x + w - D, y, D, h);
+
   ctx.restore();
 }
 
@@ -110,6 +124,7 @@ function drawGrid(ctx, x, y, w, opacity) {
 
 function drawYAxis(ctx, ticks, axMin, span, ox, oy, barsW) {
   for (const tv of ticks) {
+    if (Math.abs(tv) < 0.001) continue; // ne pas afficher le 0 sur l'axe
     const pct = Math.max(0, Math.min(1, (tv-axMin)/span));
     const yy  = oy + RAIL_H - pct*RAIL_H;
     drawGrid(ctx, ox, yy, barsW, Math.abs(tv)<0.001 ? 0.65 : 0.2);
@@ -133,7 +148,6 @@ function drawXLabels(ctx, labels, CELL_W, ox, oy) {
 }
 
 function drawXTitle(ctx, title, cx, oy) {
-  // oy = origine des barres ; labels X sont à oy+RAIL_H+14 ; titre en dessous
   if (!title) return;
   ctx.save();
   ctx.font=`700 12px "${FONT}",sans-serif`;
@@ -185,20 +199,22 @@ function calcLayout(nBars, hasYTitle, hasXTitle, hasLegend, nSeries=1, barWOverr
   const spacerW= yTtlW + Y_AX_W;
   const barsW  = CELL_W * nBars;
   const zoneW  = spacerW + barsW + ZPPAD*2;
-  const zoneH  = RAIL_H + ZPPAD*2;
   const xRowH  = 22;
   const xTtlH  = hasXTitle ? 20 : 0;
   const legendH= (hasLegend && nSeries>1) ? 28 : 0;
   const titleH = 24;
-  const totalW = PAD*2 + zoneW;
-  const totalH = PAD + GAP + titleH + GAP + zoneH + xRowH + xTtlH + legendH + PAD;
+  // FIX 2 — zoneH englobe maintenant les labels X et le titre X
+  // → tout le contenu de l'axe X est dessiné dans le carré intérieur
+  const zoneH  = RAIL_H + ZPPAD*2 + xRowH + xTtlH;
+  // totalH n'ajoute plus xRowH/xTtlH séparément (ils sont dans zoneH)
+  const totalW = PAD*2 + zoneW + SPAD*2;
+  const totalH = PAD + GAP + titleH + GAP + zoneH + legendH + PAD + SPAD*2;
   return {BAR_W, CELL_W, spacerW, yTtlW, barsW, zoneW, zoneH,
-          titleH, totalW, totalH, xRowH, xTtlH, legendH};
+          titleH, totalW, totalH, xRowH, xTtlH, legendH, spad: SPAD};
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constructeur canvas principal
-// drawContent(ctx, ox, oy, L)  — ox/oy = origine des barres dans le canvas
 // ─────────────────────────────────────────────────────────────────────────────
 
 function buildCanvas(L, cfg, drawContent) {
@@ -210,12 +226,19 @@ function buildCanvas(L, cfg, drawContent) {
   const ctx = C.getContext('2d');
   ctx.scale(SCALE, SCALE);
 
-  // Fond global BG
-  ctx.fillStyle = BG;
+  // Fond global blanc (#ffffff = BODYCOLOR Python) — la carte BG flotte dessus
+  ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, L.totalW, L.totalH);
 
+  // Translate par SPAD : donne de la place à l'ombre portée de la carte
+  const sp = L.spad ?? 0;
+  ctx.save();
+  ctx.translate(sp, sp);
+  const iW = L.totalW - 2*sp;
+  const iH = L.totalH - 2*sp;
+
   // Carte principale raised
-  neumoRaised(ctx, 5, 5, L.totalW-10, L.totalH-10, 22, 14, 14, 28);
+  neumoRaised(ctx, 5, 5, iW-10, iH-10, 22, 14, 14, 28);
 
   // Titre
   ctx.save();
@@ -226,9 +249,9 @@ function buildCanvas(L, cfg, drawContent) {
 
   // Zone chart raised interne
   const zX=PAD, zY=PAD+GAP+L.titleH+GAP;
-  neumoRaised(ctx, zX, zY, L.zoneW, L.zoneH, 18, 5, 5, 10);
+  neumoRaised(ctx, zX, zY, L.zoneW, L.zoneH, 18, 8, 8, 18);
 
-  // Origine des barres (ox = après zone + padding + axes)
+  // Origine des barres
   const ox = zX + ZPPAD + (L.yTtlW||0) + Y_AX_W;
   const oy = zY + ZPPAD;
 
@@ -240,18 +263,20 @@ function buildCanvas(L, cfg, drawContent) {
   // Contenu (axes, rails, barres)
   drawContent(ctx, ox, oy, L);
 
-  // Labels X
+  // Labels X — toujours dessinés à oy+RAIL_H+14, maintenant dans le carré
   drawXLabels(ctx, L._xLabels, L.CELL_W, ox, oy);
 
-  // Titre axe X — sous les labels X
+  // Titre axe X — toujours à oy+RAIL_H+32, maintenant dans le carré
   if (cfg.xTitle) drawXTitle(ctx, cfg.xTitle, ox+L.barsW/2, oy);
 
-  // Légende
+  // Légende (en dehors du carré intérieur, sous la zone)
   if (L._series) {
-    const legendY = zY+L.zoneH+L.xRowH+L.xTtlH+14;
+    // FIX 2 — legendY ne ré-ajoute plus xRowH/xTtlH (déjà dans zoneH)
+    const legendY = zY + L.zoneH + 14;
     drawLegend(ctx, L._series, L._colors, zX, L.zoneW, legendY);
   }
 
+  ctx.restore();
   return C;
 }
 
@@ -278,7 +303,7 @@ export function renderHistogramCanvas({ headers, rows }, cfg) {
       neumoInset(ctx, rX, oy, L.BAR_W, RAIL_H, 10);
       const bH = Math.max(0, (d.v/span)*(RAIL_H-6));
       const bW = L.BAR_W*0.65;
-      if (bH>0) drawBar(ctx, cx-bW/2, oy+RAIL_H-bH-3, bW, bH, color, [6,6,0,0]);
+      if (bH>0) drawBar(ctx, cx-bW/2, oy+RAIL_H-bH-3, bW, bH, color, [6,6,6,6]);
     });
   });
 }
@@ -308,8 +333,9 @@ export function renderStackedCanvas({ headers, rows }, cfg) {
       d.values.forEach((v,si) => {
         const bH=Math.max(0,(v/span)*(RAIL_H-6));
         const bW=L.BAR_W*0.65, bX=cx-bW/2, bY=oy+RAIL_H-botH-bH;
-        const isBot=si===0, isTop=si===series.length-1;
-        const r=isBot&&isTop?[8,8,8,8]:isTop?[8,8,0,0]:isBot?[0,0,8,8]:[0,0,0,0];
+        const isTop=si===series.length-1;
+        const isBot=si===0;
+        const r = (isBot&&isTop) ? [8,8,8,8] : isTop ? [8,8,0,0] : isBot ? [0,0,8,8] : [0,0,0,0];
         if(bH>0) drawBar(ctx, bX, bY, bW, bH, colors[si], r);
         botH+=bH;
       });
@@ -335,17 +361,17 @@ export function renderGroupedCanvas({ headers, rows }, cfg) {
   const axMin=ticks[0], axMax=ticks[ticks.length-1], span=axMax-axMin||1;
   const zeroPct=-axMin/span;
 
-  // Layout manuel (CELL_W != BAR_W + GRP_GAP standard)
   const hasYT=!!cfg.yTitle;
   const spacerW=(hasYT?Y_TTL_W:0)+Y_AX_W;
   const barsW=CELL_W*data.length;
   const zoneW=spacerW+barsW+ZPPAD*2;
-  const zoneH=RAIL_H+ZPPAD*2;
   const xRowH=22, xTtlH=cfg.xTitle?20:0, legendH=series.length>1?28:0;
-  const totalW=PAD*2+zoneW;
-  const totalH=PAD+GAP+24+GAP+zoneH+xRowH+xTtlH+legendH+PAD;
+  // FIX 2 — même logique que calcLayout : zoneH englobe xRowH et xTtlH
+  const zoneH=RAIL_H+ZPPAD*2+xRowH+xTtlH;
+  const totalW=PAD*2+zoneW+SPAD*2;
+  const totalH=PAD+GAP+24+GAP+zoneH+legendH+PAD+SPAD*2;
   const L={BAR_W:BW, CELL_W, spacerW, yTtlW:hasYT?Y_TTL_W:0, barsW, zoneW, zoneH,
-           titleH:24, totalW, totalH, xRowH, xTtlH, legendH,
+           titleH:24, totalW, totalH, xRowH, xTtlH, legendH, spad: SPAD,
            _xLabels:data.map(d=>fmtX(d.x)), _series:series, _colors:colors};
 
   return buildCanvas(L, cfg, (ctx, ox, oy) => {
@@ -358,7 +384,7 @@ export function renderGroupedCanvas({ headers, rows }, cfg) {
         const bX=gx+si*(BW+BGAP);
         const bY=v>=0 ? oy+RAIL_H-zeroPct*(RAIL_H-6)-bH-3
                       : oy+RAIL_H-zeroPct*(RAIL_H-6)-3;
-        const r=v>=0?[7,7,2,2]:[2,2,7,7];
+        const r=v>=0?[7,7,7,7]:[7,7,7,7];
         if(bH>0) drawBar(ctx, bX, bY, BW, bH, colors[si], r);
       });
     });
