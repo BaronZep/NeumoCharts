@@ -1,2 +1,4 @@
+import { loadFont } from './fonts.js';
 import { init } from './ui.js';
-document.fonts.ready.then(() => init());
+
+loadFont().then(() => init());
