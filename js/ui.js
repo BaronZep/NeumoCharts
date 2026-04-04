@@ -13,9 +13,10 @@ let paletteKey   = DEFAULT_PALETTE;
 let lastCanvas   = null;
 let importedName = null; // basename of the last imported CSV file; null when data was typed manually
 
-export function showToast(msg) {
+export function showToast(msg, success = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
+  t.classList.toggle('toast--success', success);
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
@@ -82,7 +83,21 @@ export function generate() {
   const area = document.getElementById('previewArea');
   area.innerHTML = '';
   area.appendChild(canvas);
-  document.getElementById('dlBtn').disabled = false;
+  document.getElementById('dlBtn').disabled  = false;
+  document.getElementById('copyBtn').disabled = false;
+}
+
+/**
+ * Copy the last rendered chart to the system clipboard as a PNG image.
+ * Requires a secure context (HTTPS) and browser support for ClipboardItem.
+ */
+export function copyPNG() {
+  if (!lastCanvas) { showToast("Générez d\'abord un graphique !"); return; }
+  lastCanvas.toBlob(blob => {
+    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      .then(() => showToast('Copié dans le presse-papier !', true))
+      .catch(() => showToast('Copie non supportée sur ce navigateur.'));
+  });
 }
 
 /** Download the last rendered chart as a PNG named after the source CSV or 'manual'. */
@@ -100,6 +115,7 @@ export function init() {
   });
   document.getElementById('generateBtn').addEventListener('click', generate);
   document.getElementById('dlBtn').addEventListener('click', downloadPNG);
+  document.getElementById('copyBtn').addEventListener('click', copyPNG);
   document.getElementById('fileInput').addEventListener('change', loadFile);
   document.getElementById('importBtn').addEventListener('click', () => {
     document.getElementById('fileInput').click();
