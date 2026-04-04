@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neumo Charts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300..700&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ───────────────────────────────────────────────────── */
+:root {
+  --bg:   #e6e6ea;
+  --surf: #eeedf2;
+  --sd:   #c8c8cc;
+  --sl:   #ffffff;
+  --text: #52516a;
+  --muted:#8c8ba8;
+  --accent:#9E68D2;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 26px;
+  --t: 160ms cubic-bezier(.16,1,.3,1);
+}
+/* ── RESET ────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100dvh;color:var(--text);font-size:14px;line-height:1.5}
+button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
+input,textarea{font:inherit;color:inherit;border:none;outline:none;background:transparent;width:100%}
+/* ── NEUMORPHIC PRIMITIVES ────────────────────────────────────── */
+.raised{background:var(--surf);box-shadow:6px 6px 12px var(--sd),-6px -6px 12px var(--sl)}
+.raised-sm{background:var(--surf);box-shadow:4px 4px 8px var(--sd),-4px -4px 8px var(--sl)}
+.inset{box-shadow:inset 4px 4px 8px var(--sd),inset -4px -4px 8px var(--sl)}
+/* ── LAYOUT ───────────────────────────────────────────────────── */
+.app{display:grid;grid-template-rows:auto 1fr;min-height:100dvh;padding:20px;gap:20px;max-width:1600px;margin:0 auto}
+.app-header{display:flex;align-items:center;gap:12px;padding:0 4px}
+.app-header h1{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.app-body{display:grid;grid-template-columns:300px 1fr;gap:20px;min-height:0}
+/* ── PANEL ────────────────────────────────────────────────────── */
+.panel{border-radius:var(--r-xl);padding:20px;display:flex;flex-direction:column;gap:18px}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+/* ── CSV INPUT ────────────────────────────────────────────────── */
+.csv-wrapper{border-radius:var(--r-md);padding:2px;position:relative}
+textarea.csv-area{height:150px;resize:vertical;font-family:'Consolas',monospace;font-size:11.5px;line-height:1.6;padding:10px 12px;border-radius:calc(var(--r-md) - 2px);display:block;color:var(--text)}
+textarea.csv-area::placeholder{color:var(--muted);opacity:.7}
+.import-btn{position:absolute;bottom:8px;right:8px;padding:5px 11px;font-size:11px;font-weight:700;border-radius:var(--r-sm);transition:box-shadow var(--t)}
+.import-btn:active{box-shadow:inset 2px 2px 4px var(--sd),inset -2px -2px 4px var(--sl)!important}
+/* ── TYPE SELECTOR ────────────────────────────────────────────── */
+.type-selector{display:flex;flex-direction:column;gap:6px}
+.type-btn{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:var(--r-md);font-size:13px;font-weight:600;transition:box-shadow var(--t),color var(--t);text-align:left}
+.type-btn .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background var(--t)}
+.type-btn.active{box-shadow:inset 3px 3px 6px var(--sd),inset -3px -3px 6px var(--sl);color:var(--accent)}
+.type-btn.active .dot{background:var(--accent)}
+/* ── CONFIG FIELDS ────────────────────────────────────────────── */
+.fields{display:flex;flex-direction:column;gap:8px}
+.field label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
+.field .field-input{border-radius:var(--r-sm);padding:0 10px}
+.field input{padding:8px 0;font-size:13px}
+/* ── GENERATE BTN ─────────────────────────────────────────────── */
+.gen-btn{width:100%;padding:13px;border-radius:var(--r-md);font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--accent);transition:box-shadow var(--t),transform var(--t)}
+.gen-btn:hover{box-shadow:7px 7px 14px var(--sd),-7px -7px 14px var(--sl)}
+.gen-btn:active{box-shadow:inset 3px 3px 6px var(--sd),inset -3px -3px 6px var(--sl);transform:scale(.99)}
+/* ── PREVIEW ──────────────────────────────────────────────────── */
+.preview{border-radius:var(--r-xl);display:flex;flex-direction:column;gap:0;overflow:hidden}
+.preview-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:28px;min-height:400px}
+.empty-state{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:.3;pointer-events:none}
+.empty-state p{font-size:13px;font-weight:600}
+.preview-bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1px solid rgba(0,0,0,.04)}
+.act-btn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--r-sm);font-size:12px;font-weight:700;transition:box-shadow var(--t),color var(--t),opacity var(--t)}
+.act-btn:disabled{opacity:.35;cursor:not-allowed}
+.act-btn:not(:disabled):hover{color:var(--accent)}
+.act-btn:not(:disabled):active{box-shadow:inset 2px 2px 4px var(--sd),inset -2px -2px 4px var(--sl)!important}
+/* ── ERROR TOAST ──────────────────────────────────────────────── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#fff;color:#c0392b;padding:10px 20px;border-radius:var(--r-md);box-shadow:0 8px 24px rgba(0,0,0,.12);font-weight:600;font-size:13px;transition:transform .3s ease;z-index:99}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── CHART STYLES (rendered inside preview) ───────────────────── */
+.chart-wrap{display:inline-flex;flex-direction:column;padding:36px;gap:14px;background:#F0F0F3;border-radius:24px;box-shadow:10px 10px 20px #d0d0d4,-10px -10px 20px #ffffff}
+.chart-title-el{font-size:17px;font-weight:700;color:#6c757d;white-space:nowrap;align-self:flex-start}
+.chart-zone{background:#F0F0F3;border-radius:18px;box-shadow:5px 5px 10px #d1d5d9,-5px -5px 10px #ffffff;padding:18px}
+.chart-inner{display:flex;flex-direction:row;align-items:flex-end}
+.chart-rail{background:#F0F0F3;border-radius:10px;box-shadow:inset 4px 4px 8px #d1d5d9,inset -4px -4px 8px #ffffff;position:relative;overflow:hidden}
+.chart-x-row{display:flex;flex-direction:row;gap:0;padding-top:8px}
+.chart-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:7px 15px;padding-top:4px}
+.chart-legend-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:#6c757d;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.chart-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;box-shadow:1px 1px 2px #d1d5d9,-1px -1px 2px #ffffff}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-label="Neumo Charts logo">
+      <rect width="30" height="30" rx="9" fill="#9E68D2" opacity=".12"/>
+      <rect x="5"  y="16" width="5" height="9"  rx="2.5" fill="#9E68D2"/>
+      <rect x="13" y="9"  width="5" height="16" rx="2.5" fill="#D5B8EA"/>
+      <rect x="21" y="13" width="5" height="12" rx="2.5" fill="#9E68D2"/>
+    </svg>
+    <h1>Neumo Charts</h1>
+  </header>
+
+  <div class="app-body">
+
+    <!-- ── CONTROLS ── -->
+    <aside class="panel raised" role="complementary" aria-label="Paramètres">
+
+      <!-- CSV -->
+      <div>
+        <p class="section-label">Données CSV</p>
+        <div class="csv-wrapper inset">
+          <textarea class="csv-area" id="csvInput"
+            placeholder="Collez votre CSV ici…&#10;&#10;valeur,serie1,serie2&#10;1,12,8&#10;2,15,10"></textarea>
+          <button class="import-btn raised-sm" aria-label="Importer un fichier CSV"
+            onclick="document.getElementById('fileInput').click()">Importer</button>
+          <input type="file" id="fileInput" accept=".csv,.txt" style="display:none"
+            onchange="loadFile(event)">
+        </div>
+      </div>
+
+      <!-- Type -->
+      <div>
+        <p class="section-label">Type de graphique</p>
+        <div class="type-selector" role="radiogroup" aria-label="Type de graphique">
+          <button class="type-btn raised-sm active" role="radio" aria-checked="true"
+            onclick="setType('histogram',this)" data-type="histogram">
+            <span class="dot"></span>Histogramme
+          </button>
+          <button class="type-btn raised-sm" role="radio" aria-checked="false"
+            onclick="setType('stacked',this)" data-type="stacked">
+            <span class="dot"></span>Barres empilées
+          </button>
+          <button class="type-btn raised-sm" role="radio" aria-checked="false"
+            onclick="setType('grouped',this)" data-type="grouped">
+            <span class="dot"></span>Barres groupées
+          </button>
+        </div>
+      </div>
+
+      <!-- Config -->
+      <div class="fields">
+        <p class="section-label">Configuration</p>
+        <div class="field">
+          <label for="cfgTitle">Titre du graphique</label>
+          <div class="field-input inset">
+            <input type="text" id="cfgTitle" value="Mon graphique" placeholder="Titre…">
+          </div>
+        </div>
+        <div class="field">
+          <label for="cfgXTitle">Titre axe X</label>
+          <div class="field-input inset">
+            <input type="text" id="cfgXTitle" placeholder="Axe X">
+          </div>
+        </div>
+        <div class="field">
+          <label for="cfgYTitle">Titre axe Y</label>
+          <div class="field-input inset">
+            <input type="text" id="cfgYTitle" placeholder="Axe Y">
+          </div>
+        </div>
+      </div>
+
+      <button class="gen-btn raised" onclick="generate()">Générer →</button>
+    </aside>
+
+    <!-- ── PREVIEW ── -->
+    <main class="preview raised" id="previewPanel" aria-label="Aperçu du graphique">
+      <div class="preview-area" id="previewArea">
+        <div class="empty-state" aria-hidden="true">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="6"  y="30" width="10" height="16" rx="3"/>
+            <rect x="21" y="18" width="10" height="28" rx="3"/>
+            <rect x="36" y="23" width="10" height="23" rx="3"/>
+          </svg>
+          <p>Collez un CSV et cliquez sur Générer</p>
+        </div>
+      </div>
+      <div class="preview-bar">
+        <button class="act-btn raised-sm" id="copyBtn" disabled onclick="copyChart()"
+          aria-label="Copier le graphique dans le presse-papier">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>Copier
+        </button>
+        <button class="act-btn raised-sm" id="dlBtn" disabled onclick="downloadChart()"
+          aria-label="Télécharger le graphique en PNG">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>Télécharger PNG
+        </button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════════════════════ */
+const COLORS = ['#9E68D2','#D5B8EA','#7FB5FF','#FFB57F','#7FD5B5','#FF9FB3','#A8D8EA','#FFC8A2','#D3B1C2','#C6D57E'];
+const BG='#F0F0F3', SD='#d1d5d9', SL='#ffffff', TC='#6c757d';
+const RAIL_H=300, Y_TICKS=6, Y_AX_W=52, Y_TTL_W=22, GRP_GAP=14;
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════ */
+let chartType = 'histogram';
+
+/* ═══════════════════════════════════════════════════════════════
+   UI HELPERS
+═══════════════════════════════════════════════════════════════ */
+function setType(type, btn) {
+  chartType = type;
+  document.querySelectorAll('.type-btn').forEach(b => {
+    b.classList.remove('active');
+    b.setAttribute('aria-checked','false');
+  });
+  btn.classList.add('active');
+  btn.setAttribute('aria-checked','true');
+}
+
+function loadFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => { document.getElementById('csvInput').value = ev.target.result; };
+  r.readAsText(f);
+  e.target.value = '';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CSV PARSER
+═══════════════════════════════════════════════════════════════ */
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) throw new Error('CSV invalide : au moins 2 lignes requises');
+  const headers = lines[0].split(',').map(h => h.trim());
+  if (headers.length < 2) throw new Error('Au moins 2 colonnes requises');
+  const rows = lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim());
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = vals[i] ?? '');
+    return obj;
+  });
+  return { headers, rows };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TICK HELPERS
+═══════════════════════════════════════════════════════════════ */
+function niceIntTicks(vMin, vMax, n) {
+  const raw = (vMax - vMin) / (n - 1);
+  const step = Math.max(1, Math.ceil(raw));
+  const start = Math.floor(vMin / step) * step;
+  const end = Math.ceil(vMax / step) * step;
+  const ticks = [];
+  for (let v = start; v <= end + step * 0.01; v += step) ticks.push(v);
+  return ticks;
+}
+
+function fmtX(val) {
+  const s = String(val);
+  if (/^0[xX]/.test(s)) return s;
+  const n = parseFloat(s);
+  if (!isNaN(n) && Number.isInteger(n)) return String(n);
+  if (!isNaN(n)) return String(n);
+  return s;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SHARED CHART BUILDERS
+═══════════════════════════════════════════════════════════════ */
+function buildYAxis(ticks, axMin, span) {
+  let labels = '', grid = '';
+  for (const tv of ticks) {
+    const pct = Math.max(0, Math.min(100, ((tv - axMin) / span) * 100));
+    const op = Math.abs(tv) < 0.001 ? '0.65' : '0.2';
+    labels += `<div style="position:absolute;bottom:calc(${pct.toFixed(2)}% - 8px);right:6px;font-size:11px;font-weight:600;color:${TC};white-space:nowrap;font-family:'DM Sans',sans-serif">${Math.round(tv)}</div>`;
+    grid   += `<div style="position:absolute;bottom:${pct.toFixed(2)}%;left:0;right:0;height:1px;background:${TC};opacity:${op}"></div>`;
+  }
+  return { labels, grid };
+}
+
+function buildXRow(labels, spacerW, cellW) {
+  let html = `<div style="width:${spacerW}px;flex-shrink:0"></div>`;
+  for (const lbl of labels) {
+    html += `<div style="width:${cellW}px;flex-shrink:0;text-align:center;font-size:12px;font-weight:800;color:${TC};font-family:'DM Sans',sans-serif">${lbl}</div>`;
+  }
+  return `<div class="chart-x-row">${html}</div>`;
+}
+
+function buildXTitle(title, spacerW) {
+  if (!title) return '';
+  return `<div style="display:flex;padding-top:4px"><div style="width:${spacerW}px;flex-shrink:0"></div><div style="flex:1;text-align:center;font-size:12px;font-weight:700;color:${TC};font-family:'DM Sans',sans-serif">${title}</div></div>`;
+}
+
+function buildYTitle(title) {
+  if (!title) return '';
+  return `<div style="width:${Y_TTL_W}px;height:${RAIL_H}px;flex-shrink:0;display:flex;align-items:center;justify-content:center"><span style="writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);font-size:12px;font-weight:700;color:${TC};white-space:nowrap;font-family:'DM Sans',sans-serif">${title}</span></div>`;
+}
+
+function buildLegend(series, colors) {
+  if (series.length <= 1) return '';
+  const items = series.map((s,i) =>
+    `<div class="chart-legend-item"><div class="chart-legend-dot" style="background:${colors[i]}"></div>${s}</div>`
+  ).join('');
+  return `<div class="chart-legend">${items}</div>`;
+}
+
+function wrapChart(title, inner, legend) {
+  return `<div class="chart-wrap">
+    <div class="chart-title-el">${title}</div>
+    <div class="chart-zone">${inner}</div>
+    ${legend}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HISTOGRAM
+═══════════════════════════════════════════════════════════════ */
+function renderHistogram({headers, rows}, cfg) {
+  const nomAxe = headers[0], nomSerie = headers[1];
+  const color = COLORS[0];
+  const BAR_W = Math.max(28, Math.min(60, Math.floor(700 / rows.length)));
+  const CELL_W = BAR_W + GRP_GAP;
+
+  const data = rows.map(r => ({ x: r[nomAxe], v: parseFloat(r[nomSerie]) || 0 }));
+  const maxV = Math.max(...data.map(d => d.v), 0);
+  const ticks = niceIntTicks(0, maxV, Y_TICKS);
+  const axMin = ticks[0], axMax = ticks[ticks.length-1];
+  const span = axMax - axMin || 1;
+  const { labels: yLabels, grid } = buildYAxis(ticks, axMin, span);
+  const spacerW = (cfg.yTitle ? Y_TTL_W : 0) + Y_AX_W;
+
+  let rails = '';
+  for (const d of data) {
+    const hPct = (d.v / span) * 100;
+    const bar = `<div style="position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:65%;height:${hPct.toFixed(2)}%;background:${color};border-radius:9px 9px 3px 3px;box-shadow:2px 2px 4px ${SD},-2px -2px 4px ${SL}"></div>`;
+    rails += `<div style="width:${CELL_W}px;flex-shrink:0"><div class="chart-rail" style="width:${BAR_W}px;height:${RAIL_H}px">${grid}${bar}</div></div>`;
+  }
+
+  const inner = `
+    <div class="chart-inner">
+      ${buildYTitle(cfg.yTitle)}
+      <div style="position:relative;width:${Y_AX_W}px;height:${RAIL_H}px;flex-shrink:0">${yLabels}</div>
+      <div style="display:flex;align-items:flex-end;height:${RAIL_H}px">${rails}</div>
+    </div>
+    ${buildXRow(data.map(d => fmtX(d.x)), spacerW, CELL_W)}
+    ${buildXTitle(cfg.xTitle, spacerW)}`;
+
+  return wrapChart(cfg.title, inner, '');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STACKED
+═══════════════════════════════════════════════════════════════ */
+function renderStacked({headers, rows}, cfg) {
+  if (headers.length < 2) throw new Error('2 colonnes minimum requises');
+  const nomAxe = headers[0], series = headers.slice(1);
+  const colors = series.map((_,i) => COLORS[i % COLORS.length]);
+  const BAR_W = Math.max(28, Math.min(56, Math.floor(700 / rows.length)));
+  const CELL_W = BAR_W + GRP_GAP;
+
+  const data = rows.map(r => ({
+    x: r[nomAxe],
+    values: series.map(s => parseFloat(r[s]) || 0)
+  }));
+  const maxTotal = Math.max(...data.map(d => d.values.reduce((a,b)=>a+b,0)), 0);
+  const ticks = niceIntTicks(0, maxTotal, Y_TICKS);
+  const axMin = ticks[0], axMax = ticks[ticks.length-1];
+  const span = axMax - axMin || 1;
+  const { labels: yLabels, grid } = buildYAxis(ticks, axMin, span);
+  const spacerW = (cfg.yTitle ? Y_TTL_W : 0) + Y_AX_W;
+
+  let rails = '';
+  for (const d of data) {
+    let segs = grid, botPct = 0;
+    d.values.forEach((v,i) => {
+      const hPct = (v / span) * 100;
+      const isBot = i === 0, isTop = i === series.length-1;
+      const br = isBot && isTop ? '8px' : isTop ? '8px 8px 0 0' : isBot ? '0 0 8px 8px' : '0';
+      segs += `<div style="position:absolute;bottom:${(botPct+3).toFixed(2)}%;height:${hPct.toFixed(2)}%;left:50%;transform:translateX(-50%);width:65%;background:${colors[i]};border-radius:${br};box-shadow:1px 1px 2px ${SD},-1px -1px 2px ${SL}"></div>`;
+      botPct += hPct;
+    });
+    rails += `<div style="width:${CELL_W}px;flex-shrink:0"><div class="chart-rail" style="width:${BAR_W}px;height:${RAIL_H}px">${segs}</div></div>`;
+  }
+
+  const inner = `
+    <div class="chart-inner">
+      ${buildYTitle(cfg.yTitle)}
+      <div style="position:relative;width:${Y_AX_W}px;height:${RAIL_H}px;flex-shrink:0">${yLabels}</div>
+      <div style="display:flex;align-items:flex-end;height:${RAIL_H}px">${rails}</div>
+    </div>
+    ${buildXRow(data.map(d => fmtX(d.x)), spacerW, CELL_W)}
+    ${buildXTitle(cfg.xTitle, spacerW)}`;
+
+  return wrapChart(cfg.title, inner, buildLegend(series, colors));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GROUPED (supports negative values)
+═══════════════════════════════════════════════════════════════ */
+function renderGrouped({headers, rows}, cfg) {
+  if (headers.length < 2) throw new Error('2 colonnes minimum requises');
+  const nomAxe = headers[0], series = headers.slice(1);
+  const colors = series.map((_,i) => COLORS[i % COLORS.length]);
+  const BAR_W = 15, BAR_GAP = 3;
+  const grpW = series.length * BAR_W + (series.length-1) * BAR_GAP;
+  const CELL_W = grpW + GRP_GAP;
+
+  const data = rows.map(r => ({
+    x: r[nomAxe],
+    values: series.map(s => parseFloat(r[s]) || 0)
+  }));
+  const allV = data.flatMap(d => d.values);
+  const valMin = Math.min(...allV, 0), valMax = Math.max(...allV, 0);
+  const ticks = niceIntTicks(valMin, valMax, Y_TICKS);
+  const axMin = ticks[0], axMax = ticks[ticks.length-1];
+  const span = axMax - axMin || 1;
+  const zeroPct = (-axMin / span) * 100;
+  const { labels: yLabels, grid } = buildYAxis(ticks, axMin, span);
+  const spacerW = (cfg.yTitle ? Y_TTL_W : 0) + Y_AX_W;
+
+  let rails = '';
+  for (const d of data) {
+    let bars = grid;
+    d.values.forEach((v,i) => {
+      const hPct = Math.abs(v) / span * 100;
+      const leftPx = i * (BAR_W + BAR_GAP);
+      const botPct = v >= 0 ? zeroPct : zeroPct - hPct;
+      const br = v >= 0 ? '7px 7px 2px 2px' : '2px 2px 7px 7px';
+      bars += `<div style="position:absolute;bottom:${botPct.toFixed(2)}%;height:${hPct.toFixed(2)}%;left:${leftPx}px;width:${BAR_W}px;background:${colors[i]};border-radius:${br};box-shadow:1px 1px 2px ${SD},-1px -1px 2px ${SL}"></div>`;
+    });
+    rails += `<div style="width:${CELL_W}px;flex-shrink:0"><div class="chart-rail" style="width:${grpW}px;height:${RAIL_H}px">${bars}</div></div>`;
+  }
+
+  const inner = `
+    <div class="chart-inner">
+      ${buildYTitle(cfg.yTitle)}
+      <div style="position:relative;width:${Y_AX_W}px;height:${RAIL_H}px;flex-shrink:0">${yLabels}</div>
+      <div style="display:flex;align-items:flex-end;height:${RAIL_H}px">${rails}</div>
+    </div>
+    ${buildXRow(data.map(d => fmtX(d.x)), spacerW, CELL_W)}
+    ${buildXTitle(cfg.xTitle, spacerW)}`;
+
+  return wrapChart(cfg.title, inner, buildLegend(series, colors));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GENERATE
+═══════════════════════════════════════════════════════════════ */
+function generate() {
+  const csvText = document.getElementById('csvInput').value.trim();
+  if (!csvText) { showToast('Collez d\'abord un CSV !'); return; }
+
+  let parsed;
+  try { parsed = parseCSV(csvText); }
+  catch(e) { showToast(e.message); return; }
+
+  const cfg = {
+    title:  document.getElementById('cfgTitle').value.trim() || 'Mon graphique',
+    xTitle: document.getElementById('cfgXTitle').value.trim(),
+    yTitle: document.getElementById('cfgYTitle').value.trim(),
+  };
+
+  let html;
+  try {
+    if      (chartType === 'histogram') html = renderHistogram(parsed, cfg);
+    else if (chartType === 'stacked')   html = renderStacked(parsed, cfg);
+    else                                html = renderGrouped(parsed, cfg);
+  } catch(e) { showToast('Erreur : ' + e.message); return; }
+
+  const area = document.getElementById('previewArea');
+  area.innerHTML = html;
+
+  document.getElementById('copyBtn').disabled = false;
+  document.getElementById('dlBtn').disabled   = false;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EXPORT
+═══════════════════════════════════════════════════════════════ */
+async function getCanvas() {
+  const el = document.querySelector('.chart-wrap');
+  if (!el) return null;
+  return html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+}
+
+async function downloadChart() {
+  const btn = document.getElementById('dlBtn');
+  btn.textContent = '…';
+  const canvas = await getCanvas();
+  if (!canvas) return;
+  const a = document.createElement('a');
+  a.download = 'neumo-chart.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger PNG';
+}
+
+async function copyChart() {
+  const btn = document.getElementById('copyBtn');
+  const canvas = await getCanvas();
+  if (!canvas) return;
+  canvas.toBlob(async blob => {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+      btn.textContent = '✓ Copié !';
+      setTimeout(() => { btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copier'; }, 2000);
+    } catch { showToast('Copie non supportée — utilisez Télécharger'); }
+  });
+}
+</script>
+</body>
+</html>
