@@ -228,7 +228,7 @@ function buildCanvas(L, cfg, drawContent) {
 
   // Fond global blanc (#ffffff = BODYCOLOR Python) — la carte BG flotte dessus
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, L.totalW, L.totalH);
+  // ctx.fillRect(0, 0, L.totalW, L.totalH);
 
   // Translate par SPAD : donne de la place à l'ombre portée de la carte
   const sp = L.spad ?? 0;
