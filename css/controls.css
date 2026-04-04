@@ -81,8 +81,21 @@ textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
   color: var(--muted);
   margin-bottom: 4px;
 }
-.field .field-input { border-radius: var(--r-sm); padding: 0 10px; }
-.field input { padding: 8px 0; font-size: 13px; }
+.field .field-input { border-radius: var(--r-sm); padding: 2px 2px; }
+.field input {
+  display: block;
+  width: 100%;
+  padding: 7px 8px;
+  font-size: 13px;
+  border-radius: calc(var(--r-sm) - 2px);
+}
+/* Focus ring sur le wrapper (identique au CSV wrapper), pas sur l'input nu */
+.field input:focus-visible { outline: none; }
+.field-input:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+  border-radius: var(--r-sm);
+}
 
 /* Generate button */
 .gen-btn {
