@@ -274,7 +274,6 @@ function buildCanvas(L, cfg, drawContent) {
   // Titre axe X — toujours à oy+RAIL_H+32, maintenant dans le carré
   if (cfg.xTitle) drawXTitle(ctx, cfg.xTitle, ox+L.barsW/2, oy);
 
-  // Légende à l'intérieur de la zone (évite l'ombre portée)
   if (L._series) {
     const legendY = zY + L.zoneH + 30;
     drawLegend(ctx, L._series, L._colors, zX, L.zoneW, legendY);
