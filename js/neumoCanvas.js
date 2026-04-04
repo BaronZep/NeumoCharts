@@ -11,6 +11,15 @@ const GAP   = 14;
 const ZPPAD = 18;
 const SPAD  = 48; // marge canvas pour ombre portée de la carte
 
+
+// ── Tailles de police (en px logiques, modifier ici pour tout changer) ──────
+const FS_TITLE   = 25;   // titre principal du graphique
+const FS_XLABEL  = 12;   // étiquettes axe X
+const FS_XTITLE  = 16;   // titre axe X
+const FS_YTITLE  = 16;   // titre axe Y
+const FS_YAXIS   = 11;   // valeurs axe Y
+const FS_LEGEND  = 11.5; // légende (multi-séries)
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Utilitaires Canvas
 // ─────────────────────────────────────────────────────────────────────────────
@@ -129,7 +138,7 @@ function drawYAxis(ctx, ticks, axMin, span, ox, oy, barsW) {
     const yy  = oy + RAIL_H - pct*RAIL_H;
     drawGrid(ctx, ox, yy, barsW, Math.abs(tv)<0.001 ? 0.65 : 0.2);
     ctx.save();
-    ctx.font=`600 11px "${FONT}",sans-serif`;
+    ctx.font=`600 ${FS_YAXIS}px "${FONT}",sans-serif`;
     ctx.fillStyle=TC; ctx.textAlign='right'; ctx.textBaseline='middle';
     ctx.fillText(Math.round(tv), ox-4, yy);
     ctx.restore();
@@ -140,7 +149,7 @@ function drawXLabels(ctx, labels, CELL_W, ox, oy) {
   const y = oy + RAIL_H + 14;
   labels.forEach((lbl,i) => {
     ctx.save();
-    ctx.font=`800 12px "${FONT}",sans-serif`;
+    ctx.font=`800 ${FS_XLABEL}px "${FONT}",sans-serif`;
     ctx.fillStyle=TC; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(String(lbl), ox + i*CELL_W + CELL_W/2, y);
     ctx.restore();
@@ -150,7 +159,7 @@ function drawXLabels(ctx, labels, CELL_W, ox, oy) {
 function drawXTitle(ctx, title, cx, oy) {
   if (!title) return;
   ctx.save();
-  ctx.font=`700 12px "${FONT}",sans-serif`;
+  ctx.font=`700 ${FS_XTITLE}px "${FONT}",sans-serif`;
   ctx.fillStyle=TC; ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(title, cx, oy + RAIL_H + 14 + 18);
   ctx.restore();
@@ -161,7 +170,7 @@ function drawYTitle(ctx, title, cx, cy) {
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(-Math.PI/2);
-  ctx.font=`700 12px "${FONT}",sans-serif`;
+  ctx.font=`700 ${FS_YTITLE}px "${FONT}",sans-serif`;
   ctx.fillStyle=TC; ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(title, 0, 0);
   ctx.restore();
@@ -171,7 +180,7 @@ function drawLegend(ctx, series, colors, zX, zoneW, y) {
   if (series.length<=1) return;
   const DOT=10, DGAP=5, IGAP=16;
   ctx.save();
-  ctx.font=`500 11.5px "${FONT}",sans-serif`;
+  ctx.font=`500 ${FS_LEGEND}px "${FONT}",sans-serif`;
   const items = series.map((s,i)=>({s, w:ctx.measureText(s).width+DOT+DGAP, c:colors[i]}));
   const totalW = items.reduce((a,b)=>a+b.w,0)+(items.length-1)*IGAP;
   let x = zX + (zoneW-totalW)/2;
@@ -226,9 +235,8 @@ function buildCanvas(L, cfg, drawContent) {
   const ctx = C.getContext('2d');
   ctx.scale(SCALE, SCALE);
 
-  // Fond global blanc (#ffffff = BODYCOLOR Python) — la carte BG flotte dessus
-  ctx.fillStyle = '#ffffff';
-  // ctx.fillRect(0, 0, L.totalW, L.totalH);
+  // Fond transparent : on ne remplit pas — le canvas reste transparent en dehors de la carte
+  // (dans le navigateur le fond de page est blanc, à l'export le PNG aura un fond transparent)
 
   // Translate par SPAD : donne de la place à l'ombre portée de la carte
   const sp = L.spad ?? 0;
@@ -242,7 +250,7 @@ function buildCanvas(L, cfg, drawContent) {
 
   // Titre
   ctx.save();
-  ctx.font=`700 17px "${FONT}",sans-serif`;
+  ctx.font=`700 ${FS_TITLE}px "${FONT}",sans-serif`;
   ctx.fillStyle=TC; ctx.textBaseline='middle';
   ctx.fillText(cfg.title||'', PAD, PAD + L.titleH/2);
   ctx.restore();
