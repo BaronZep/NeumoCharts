@@ -1,0 +1,3 @@
+.raised    { background: var(--surf); box-shadow:  6px  6px 12px var(--sd), -6px -6px 12px var(--sl); }
+.raised-sm { background: var(--surf); box-shadow:  4px  4px  8px var(--sd), -4px -4px  8px var(--sl); }
+.inset     {                           box-shadow: inset 4px 4px 8px var(--sd), inset -4px -4px 8px var(--sl); }

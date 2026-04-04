@@ -1,0 +1,99 @@
+.panel {
+  border-radius: var(--r-xl);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+/* CSV textarea */
+.csv-wrapper { border-radius: var(--r-md); padding: 2px; position: relative; }
+textarea.csv-area {
+  height: 150px;
+  resize: vertical;
+  font-family: 'Consolas', monospace;
+  font-size: 11.5px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  border-radius: calc(var(--r-md) - 2px);
+  display: block;
+  color: var(--text);
+  transition: height var(--t);
+}
+textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
+
+.import-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--r-sm);
+  transition: box-shadow var(--t);
+}
+.import-btn:active { box-shadow: inset 2px 2px 4px var(--sd), inset -2px -2px 4px var(--sl) !important; }
+
+/* Type selector */
+.type-selector { display: flex; flex-direction: column; gap: 6px; }
+.type-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 600;
+  transition: box-shadow var(--t), color var(--t);
+  text-align: left;
+}
+.type-btn .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+  transition: background var(--t);
+}
+.type-btn.active {
+  box-shadow: inset 3px 3px 6px var(--sd), inset -3px -3px 6px var(--sl);
+  color: var(--accent);
+}
+.type-btn.active .dot { background: var(--accent); }
+
+/* Config fields */
+.fields { display: flex; flex-direction: column; gap: 8px; }
+.field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.field .field-input { border-radius: var(--r-sm); padding: 0 10px; }
+.field input { padding: 8px 0; font-size: 13px; }
+
+/* Generate button */
+.gen-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--accent);
+  transition: box-shadow var(--t), transform var(--t);
+}
+.gen-btn:hover  { box-shadow: 7px 7px 14px var(--sd), -7px -7px 14px var(--sl); }
+.gen-btn:active { box-shadow: inset 3px 3px 6px var(--sd), inset -3px -3px 6px var(--sl); transform: scale(.99); }

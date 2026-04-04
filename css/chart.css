@@ -1,0 +1,71 @@
+.chart-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 36px;
+  gap: 14px;
+  background: #F0F0F3;
+  border-radius: 24px;
+  box-shadow: 10px 10px 20px #d0d0d4, -10px -10px 20px #ffffff;
+}
+
+.chart-title-el {
+  font-size: 17px;
+  font-weight: 700;
+  color: #6c757d;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+.chart-zone {
+  background: #F0F0F3;
+  border-radius: 18px;
+  box-shadow: 5px 5px 10px #d1d5d9, -5px -5px 10px #ffffff;
+  padding: 18px;
+}
+
+.chart-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+.chart-rail {
+  background: #F0F0F3;
+  border-radius: 10px;
+  box-shadow: inset 4px 4px 8px #d1d5d9, inset -4px -4px 8px #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-x-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  padding-top: 8px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px 15px;
+  padding-top: 4px;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: #6c757d;
+  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.chart-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  box-shadow: 1px 1px 2px #d1d5d9, -1px -1px 2px #ffffff;
+}
