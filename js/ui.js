@@ -1,6 +1,6 @@
 import { CSV_PLACEHOLDERS, PALETTES, DEFAULT_PALETTE } from './constants.js';
 import { parseCSV } from './csv.js';
-import { renderHistogramCanvas, renderStackedCanvas, renderGroupedCanvas, canvasToDataURL } from './neumoCanvas.js';
+import { renderHistogramCanvas, renderStackedCanvas, renderGroupedCanvas, renderLineCanvas, canvasToDataURL } from './neumoCanvas.js';
 
 let chartType = 'histogram';
 let paletteKey = DEFAULT_PALETTE;
@@ -61,6 +61,7 @@ export function generate() {
   try {
     if      (chartType === 'histogram') canvas = renderHistogramCanvas(parsed, cfg);
     else if (chartType === 'stacked')   canvas = renderStackedCanvas(parsed, cfg);
+    else if (chartType === 'line')      canvas = renderLineCanvas(parsed, cfg);
     else                                canvas = renderGroupedCanvas(parsed, cfg);
   } catch (e) { showToast('Erreur : ' + e.message); return; }
 

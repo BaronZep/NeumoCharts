@@ -118,6 +118,8 @@ textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
 .field select {
   display: block;
   width: 100%;
+  border: none;
+  outline: none;
   padding: 7px 32px 7px 8px;
   font-size: 13px;
   border-radius: calc(var(--r-sm) - 2px);
@@ -125,8 +127,6 @@ textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
   background: transparent;
   appearance: none;
   -webkit-appearance: none;
-  border: none;
-  outline: none;
 }
 .field select:focus-visible { outline: none; }
 .select-wrap { position: relative; }

@@ -401,3 +401,153 @@ export function renderGroupedCanvas({ headers, rows }, cfg) {
 export function canvasToDataURL(canvas) {
   return canvas.toDataURL('image/png');
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Courbes (Line Chart)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Trace une courbe bezier lissée + aire dégradée pour une série */
+function drawLineSeries(ctx, pts, color, oy, alpha=0.22) {
+  const n = pts.length;
+  if (n < 2) return;
+
+  // ── Aire remplie sous la courbe ──────────────────────────────────────────
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < n; i++) {
+    const cpx = (pts[i-1].x + pts[i].x) / 2;
+    ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.lineTo(pts[n-1].x, oy + RAIL_H - 3);
+  ctx.lineTo(pts[0].x,   oy + RAIL_H - 3);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, oy, 0, oy + RAIL_H);
+  grad.addColorStop(0, hexAlpha(color, alpha));
+  grad.addColorStop(1, hexAlpha(color, 0));
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // ── Trait de la courbe ───────────────────────────────────────────────────
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < n; i++) {
+    const cpx = (pts[i-1].x + pts[i].x) / 2;
+    ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** Points de données avec effet raised neumorphique */
+function drawLinePoints(ctx, pts, color) {
+  const R = 4.5;
+  pts.forEach(({x, y}) => {
+    // Ombre portée
+    ctx.save();
+    ctx.shadowColor   = SD2;
+    ctx.shadowBlur    = 5;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, R, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+
+    // Reflet lumineux (haut-gauche)
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x - 1.2, y - 1.2, R * 0.45, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+/** Convertit un hex couleur (#RRGGBB) en rgba avec alpha */
+function hexAlpha(hex, a) {
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+export function renderLineCanvas({ headers, rows }, cfg) {
+  const nomAxe  = headers[0];
+  const series  = headers.slice(1);
+  const palette = cfg.colors || COLORS;
+  const colors  = series.map((_,i) => palette[i % palette.length]);
+  const hasMany = series.length > 1;
+
+  // Données par série
+  const seriesData = series.map(s =>
+    rows.map(r => ({ x: r[nomAxe], v: parseFloat(r[s]) || 0 }))
+  );
+
+  // Calcul de l'échelle globale (max de toutes les séries)
+  const allVals = seriesData.flat().map(d => d.v);
+  const maxV    = Math.max(...allVals, 0);
+  const ticks   = niceIntTicks(0, maxV, Y_TICKS);
+  const axMin   = ticks[0], axMax = ticks[ticks.length-1], span = axMax - axMin || 1;
+
+  const n = rows.length;
+  // CELL_W fixe pour line chart : espacement confortable entre points
+  const CELL_W_LINE = Math.max(36, Math.min(80, Math.floor(700 / n)));
+  const BAR_W_LINE  = CELL_W_LINE;
+
+  const L = calcLayout(n, !!cfg.yTitle, !!cfg.xTitle, hasMany, series.length, BAR_W_LINE);
+  L._xLabels = rows.map(r => fmtX(r[nomAxe]));
+  if (hasMany) { L._series = series; L._colors = colors; }
+
+  return buildCanvas(L, cfg, (ctx, ox, oy) => {
+    // Grille Y
+    drawYAxis(ctx, ticks, axMin, span, ox, oy, L.barsW);
+
+    // Grille verticale légère aux points X
+    ctx.save();
+    ctx.strokeStyle = `rgba(0,0,0,0.04)`;
+    ctx.lineWidth   = 1;
+    for (let i = 0; i < n; i++) {
+      const cx = ox + i*L.CELL_W + L.CELL_W/2;
+      ctx.beginPath();
+      ctx.moveTo(cx, oy);
+      ctx.lineTo(cx, oy + RAIL_H);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Calcul des points pour chaque série
+    const allPts = seriesData.map(sd =>
+      sd.map((d, i) => ({
+        x: ox + i*L.CELL_W + L.CELL_W/2,
+        y: oy + RAIL_H - Math.max(0, (d.v - axMin)/span) * (RAIL_H - 6) - 3,
+      }))
+    );
+
+    // Dessine d'abord toutes les aires (pour éviter qu'elles masquent les courbes)
+    allPts.forEach((pts, si) => drawLineSeries(ctx, pts, colors[si], oy));
+
+    // Puis toutes les courbes
+    allPts.forEach((pts, si) => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length; i++) {
+        const cpx = (pts[i-1].x + pts[i].x) / 2;
+        ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+      }
+      ctx.strokeStyle = colors[si];
+      ctx.lineWidth   = 2.5;
+      ctx.lineJoin    = 'round';
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // Puis tous les points (au-dessus de tout)
+    allPts.forEach((pts, si) => drawLinePoints(ctx, pts, colors[si]));
+  });
+}

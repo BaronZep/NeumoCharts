@@ -43,4 +43,18 @@ Mar,15,10
 Mer,9,14
 Jeu,18,11
 Ven,7,13`,
+
+  line: `mois,Bordeaux,Champagne,Loire
+Jan,42,55,33
+Fév,48,62,37
+Mar,61,71,44
+Avr,74,68,55
+Mai,88,74,66
+Jun,95,79,72
+Jul,91,76,69
+Aoû,87,72,65
+Sep,79,82,60
+Oct,68,91,51
+Nov,53,74,42
+Déc,45,68,36`,
 };
