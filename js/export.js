@@ -7,11 +7,25 @@ import { showToast } from './ui.js';
 async function getCanvas() {
   const el = document.querySelector('.chart-wrap');
   if (!el) return null;
+
+  // Force le navigateur à avoir la font prête
+  await document.fonts.ready;
+
   return html2canvas(el, {
     scale: 2,
     backgroundColor: '#ffffff',
     useCORS: true,
     logging: false,
+    onclone: (clonedDoc) => {
+      // Copie toutes les @font-face dans le document cloné
+      const style = clonedDoc.createElement('style');
+      style.textContent = [...document.styleSheets]
+        .flatMap(s => { try { return [...s.cssRules]; } catch { return []; } })
+        .filter(r => r instanceof CSSFontFaceRule)
+        .map(r => r.cssText)
+        .join('\n');
+      clonedDoc.head.appendChild(style);
+    }
   });
 }
 
