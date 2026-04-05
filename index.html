@@ -68,6 +68,10 @@
             data-type="pie">
             <span class="dot"></span><span data-i18n="type-pie">Camembert</span>
           </button>
+          <button class="type-btn raised-sm" role="radio" aria-checked="false"
+            data-type="comparaison">
+            <span class="dot"></span><span data-i18n="type-comparaison">Comparaison</span>
+          </button>
         </div>
 
         <div id="pieOptions" style="display:none; margin-top:10px;">
@@ -79,6 +83,12 @@
             <span class="lang-label lang-fr" data-i18n="toggle-off">Non</span>
             <span class="lang-label lang-en" data-i18n="toggle-on">Oui</span>
           </div>
+        </div>
+        <div id="compOptions" style="display:none; margin-top:10px;">
+          <p class="section-label" style="margin-bottom:6px;" data-i18n="comp-max-label">Maximum</p>
+          <input class="text-input inset" type="number" id="compMax"
+            min="1" step="1" placeholder="auto"
+            aria-label="Valeur maximale (100% de l'anneau)" />
         </div>
       </div>
 

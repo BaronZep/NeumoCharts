@@ -13,6 +13,18 @@ export const PALETTES = {
   moss:     ['#6E8B3D','#BDD08D','#86A857','#D8E5B8','#566C2E','#A4C070','#455725','#EAF1D9','#789348','#C9D9A2'],
   dusk:     ['#5E6FAF','#B7C2EA','#7E8DCA','#D7DDF4','#4B5A93','#9DA9DB','#3C4978','#E7EBFA','#6979BB','#C7D0EF'],
   rosewood: ['#B45E7A','#E8B6C4','#CC7D96','#F2CFD8','#93455F','#DA98AB','#77354C','#F7E1E7','#BF6B88','#EEC2CE'],
+
+  pie: `categorie,valeur
+Marketing,42
+Tech,28
+RH,15
+Finance,20`,
+
+  comparaison: `serie,valeur
+Produit A,82
+Produit B,64
+Produit C,91
+Produit D,47`,
 };
 
 export const DEFAULT_PALETTE = 'mercury';
@@ -66,4 +78,16 @@ Sep,79,82,60
 Oct,68,91,51
 Nov,53,74,42
 Déc,45,68,36`,
+
+  pie: `categorie,valeur
+Marketing,42
+Tech,28
+RH,15
+Finance,20`,
+
+  comparaison: `serie,valeur
+Produit A,82
+Produit B,64
+Produit C,91
+Produit D,47`,
 };

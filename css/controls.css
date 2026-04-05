@@ -180,3 +180,24 @@ textarea.csv-area {
   outline-offset: 0;
   border-radius: var(--r-sm);
 }
+/* ── Number input for chart options (e.g. Comparaison max) ── */
+.text-input.inset {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--color-bg, #F0F0F3);
+  color: var(--color-text, #6c757d);
+  font: 500 14px/1 'DM Sans', sans-serif;
+  box-shadow:
+    inset 3px 3px 7px #d1d5d9,
+    inset -3px -3px 7px #ffffff;
+  outline: none;
+  transition: box-shadow 180ms ease;
+}
+.text-input.inset:focus {
+  box-shadow:
+    inset 4px 4px 9px #c8ccd0,
+    inset -2px -2px 6px #ffffff;
+}
+.text-input.inset::placeholder { color: #b0b5bb; }

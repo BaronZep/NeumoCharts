@@ -76,9 +76,6 @@ export function renderPieCanvas({ headers, rows }, cfg) {
   const ctx = canvas.getContext('2d');
   ctx.scale(SCALE, SCALE);
 
-  ctx.fillStyle = BG;
-  ctx.fillRect(0, 0, W, H);
-
   ctx.save();
   ctx.translate(SPAD, SPAD);
   const iW = W - 2 * SPAD;

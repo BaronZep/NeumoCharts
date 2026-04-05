@@ -9,6 +9,7 @@ import { CSV_PLACEHOLDERS, PALETTES, DEFAULT_PALETTE } from './constants.js';
 import { parseCSV } from './csv.js';
 import { renderBarresCanvas, renderStackedCanvas, renderGroupedCanvas, renderLineCanvas, canvasToDataURL } from './neumoCanvas.js';
 import { renderPieCanvas } from './pieCanvas.js';
+import { renderCompCanvas } from './compCanvas.js';
 import { t, applyLang, DEFAULT_LANG } from './i18n.js';
 
 let chartType     = 'barres';
@@ -18,6 +19,7 @@ let importedName  = null;
 let _debounce     = null;
 let currentLang   = DEFAULT_LANG;
 let pieShowLabels = true;
+let compMax       = null;  // null = auto (max des valeurs)
 
 export function showToast(msg, success = false) {
   const el = document.getElementById('toast');
@@ -32,8 +34,10 @@ function updatePlaceholder(type) {
 }
 
 function updatePieOptionsVisibility() {
-  const el = document.getElementById('pieOptions');
-  if (el) el.style.display = chartType === 'pie' ? 'block' : 'none';
+  const elPie  = document.getElementById('pieOptions');
+  const elComp = document.getElementById('compOptions');
+  if (elPie)  elPie.style.display  = chartType === 'pie'         ? 'block' : 'none';
+  if (elComp) elComp.style.display = chartType === 'comparaison' ? 'block' : 'none';
 }
 
 function syncPieLabelsSlider() {
@@ -90,6 +94,7 @@ export function generate() {
     colors:  PALETTES[paletteKey] || PALETTES[DEFAULT_PALETTE],
     palette: paletteKey,
     pieShowLabels,
+    compMax: (() => { const v = parseFloat(document.getElementById('compMax')?.value); return v > 0 ? v : null; })(),
   };
 
   let canvas;
@@ -98,6 +103,7 @@ export function generate() {
     else if (chartType === 'stacked') canvas = renderStackedCanvas(parsed, cfg);
     else if (chartType === 'line')    canvas = renderLineCanvas(parsed, cfg);
     else if (chartType === 'pie')     canvas = renderPieCanvas(parsed, cfg);
+    else if (chartType === 'comparaison') canvas = renderCompCanvas(parsed, cfg);
     else                              canvas = renderGroupedCanvas(parsed, cfg);
   } catch (e) { showToast(t('toast-error') + e.message); return; }
 
@@ -175,6 +181,12 @@ export function init() {
   document.getElementById('csvInput').addEventListener('input', () => {
     importedName = null;
   });
+
+  document.getElementById('compMax')
+    ?.addEventListener('input', () => {
+      clearTimeout(_debounce);
+      _debounce = setTimeout(() => { if (lastCanvas && chartType === 'comparaison') generate(); }, 300);
+    });
 
   applyLang(currentLang);
   updatePlaceholder(chartType);
