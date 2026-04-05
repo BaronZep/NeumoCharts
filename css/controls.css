@@ -17,6 +17,14 @@
   margin-bottom: 6px;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.section-header .section-label { margin-bottom: 0; }
+
 /* CSV textarea */
 .csv-wrapper { border-radius: var(--r-md); padding: 2px; position: relative; }
 textarea.csv-area {
@@ -30,15 +38,43 @@ textarea.csv-area {
   display: block;
   color: var(--text);
   transition: height var(--t);
+  white-space: pre;
+  overflow-x: auto;
+  overflow-y: auto;
 }
 textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
 
+/* Scrollbars neumorphiques sur la textarea CSV */
+textarea.csv-area::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+textarea.csv-area::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-radius: 99px;
+  box-shadow: inset 2px 2px 4px var(--sd), inset -2px -2px 4px var(--sl);
+}
+textarea.csv-area::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 40%, transparent);
+  border-radius: 99px;
+  box-shadow: 1px 1px 2px var(--sd), -1px -1px 2px var(--sl);
+}
+textarea.csv-area::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+textarea.csv-area::-webkit-scrollbar-corner {
+  background: var(--bg);
+}
+
+/* Firefox */
+textarea.csv-area {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 40%, transparent) var(--bg);
+}
+
 .import-btn {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  padding: 5px 11px;
-  font-size: 11px;
+  padding: 4px 10px;
+  font-size: 10.5px;
   font-weight: 700;
   border-radius: var(--r-sm);
   transition: box-shadow var(--t);
@@ -91,7 +127,6 @@ textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
   font-size: 13px;
   border-radius: calc(var(--r-sm) - 2px);
 }
-/* Focus ring sur le wrapper (identique au CSV wrapper), pas sur l'input nu */
 .field input:focus-visible { outline: none; }
 .field-input:focus-within {
   outline: 2px solid var(--accent);
@@ -101,7 +136,7 @@ textarea.csv-area::placeholder { color: var(--muted); opacity: .7; }
 
 /* Generate button */
 .gen-btn {
-  margin-top: auto; /* colle le bouton en bas du panel */
+  margin-top: auto;
   width: 100%;
   padding: 13px;
   border-radius: var(--r-md);

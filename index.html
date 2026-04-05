@@ -31,14 +31,16 @@
     <aside class="panel raised" role="complementary" aria-label="Paramètres">
 
       <div>
-        <p class="section-label">Données CSV</p>
-        <div class="csv-wrapper inset">
-          <textarea class="csv-area" id="csvInput" spellcheck="false"
-            aria-label="Contenu CSV"></textarea>
+        <div class="section-header">
+          <p class="section-label">Données CSV</p>
           <button class="import-btn raised-sm" id="importBtn"
             aria-label="Importer un fichier CSV">Importer</button>
           <input type="file" id="fileInput" accept=".csv,.txt" style="display:none"
             aria-hidden="true">
+        </div>
+        <div class="csv-wrapper inset">
+          <textarea class="csv-area" id="csvInput" spellcheck="false"
+            aria-label="Contenu CSV"></textarea>
         </div>
       </div>
 
