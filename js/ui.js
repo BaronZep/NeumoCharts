@@ -12,6 +12,7 @@ let chartType    = 'barres';
 let paletteKey   = DEFAULT_PALETTE;
 let lastCanvas   = null;
 let importedName = null; // basename of the last imported CSV file; null when data was typed manually
+let _debounce    = null; // debounce timer for config field auto-regen
 
 export function showToast(msg, success = false) {
   const t = document.getElementById('toast');
@@ -34,6 +35,7 @@ export function setType(type, btn) {
   btn.classList.add('active');
   btn.setAttribute('aria-checked', 'true');
   updatePlaceholder(type);
+  if (lastCanvas) generate();
 }
 
 export function setPalette(key) {
@@ -73,17 +75,17 @@ export function generate() {
 
   let canvas;
   try {
-    if      (chartType === 'barres') canvas = renderBarresCanvas(parsed, cfg);
-    else if (chartType === 'stacked')   canvas = renderStackedCanvas(parsed, cfg);
-    else if (chartType === 'line')      canvas = renderLineCanvas(parsed, cfg);
-    else                                canvas = renderGroupedCanvas(parsed, cfg);
+    if      (chartType === 'barres')  canvas = renderBarresCanvas(parsed, cfg);
+    else if (chartType === 'stacked') canvas = renderStackedCanvas(parsed, cfg);
+    else if (chartType === 'line')    canvas = renderLineCanvas(parsed, cfg);
+    else                              canvas = renderGroupedCanvas(parsed, cfg);
   } catch (e) { showToast('Erreur : ' + e.message); return; }
 
   lastCanvas = canvas;
   const area = document.getElementById('previewArea');
   area.innerHTML = '';
   area.appendChild(canvas);
-  document.getElementById('dlBtn').disabled  = false;
+  document.getElementById('dlBtn').disabled   = false;
   document.getElementById('copyBtn').disabled = false;
 }
 
@@ -92,7 +94,7 @@ export function generate() {
  * Requires a secure context (HTTPS) and browser support for ClipboardItem.
  */
 export function copyPNG() {
-  if (!lastCanvas) { showToast("Générez d\'abord un graphique !"); return; }
+  if (!lastCanvas) { showToast("Générez d'abord un graphique !"); return; }
   // Safari 17.4+ requires a Promise<Blob> passed directly to ClipboardItem
   // (synchronous pattern). Chrome/Firefox also support this form.
   const blobPromise = new Promise(resolve => lastCanvas.toBlob(resolve, 'image/png'));
@@ -125,8 +127,19 @@ export function init() {
   const paletteSelect = document.getElementById('cfgPalette');
   if (paletteSelect) {
     paletteSelect.value = DEFAULT_PALETTE;
-    paletteSelect.addEventListener('change', e => setPalette(e.target.value));
+    paletteSelect.addEventListener('change', e => {
+      setPalette(e.target.value);
+      if (lastCanvas) generate();
+    });
   }
+
+  // Titles — auto-regen with 300 ms debounce to avoid re-rendering on every keystroke
+  ['cfgTitle', 'cfgXTitle', 'cfgYTitle'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      clearTimeout(_debounce);
+      _debounce = setTimeout(() => { if (lastCanvas) generate(); }, 300);
+    });
+  });
 
   // Manual edits to the textarea clear the imported filename so the PNG is
   // saved as 'manual.png' rather than the stale file name.
