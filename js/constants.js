@@ -36,6 +36,11 @@ export const SD  = '#d1d5d9'; // shadow dark
 export const SL  = '#ffffff'; // shadow light
 export const TC  = '#6c757d'; // text / tick colour
 
+export const DARK_BG = '#1e2028'; // dark card background
+export const DARK_SD = '#14161d'; // dark shadow dark
+export const DARK_SL = '#303342'; // dark shadow light
+export const DARK_TC = '#c4ccda'; // dark text / tick colour
+
 // ── Chart layout constants (logical px) ─────────────────────────────────────
 export const RAIL_H  = 300; // height of the drawable bar area
 export const Y_TICKS = 6;   // target number of Y-axis tick marks

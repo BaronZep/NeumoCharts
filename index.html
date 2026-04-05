@@ -154,12 +154,30 @@
         </div>
       </div>
       <div class="preview-bar">
-        <div class="lang-slider inset" id="langToggle"
-          role="switch" aria-checked="false" tabindex="0"
-          aria-label="Langue / Language">
-          <span class="lang-thumb raised-sm"></span>
-          <span class="lang-label lang-fr">FR</span>
-          <span class="lang-label lang-en">EN</span>
+        <div class="slider-group">
+          <div class="lang-slider inset" id="langToggle"
+            role="switch" aria-checked="false" tabindex="0"
+            aria-label="Langue / Language">
+            <span class="lang-thumb raised-sm"></span>
+            <span class="lang-label lang-fr">FR</span>
+            <span class="lang-label lang-en">EN</span>
+          </div>
+          <div class="theme-slider inset" id="themeToggle"
+            role="switch" aria-checked="false" tabindex="0"
+            aria-label="Mode sombre / Dark mode">
+            <span class="theme-thumb raised-sm"></span>
+            <span class="theme-label theme-light" aria-hidden="true">
+              <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+              </svg>
+            </span>
+            <span class="theme-label theme-dark" aria-hidden="true">
+              <svg class="theme-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3c0 .31.02.62.05.92A7 7 0 0 0 20.08 12c.3.03.61.05.92.05z"></path>
+              </svg>
+            </span>
+          </div>
         </div>
         <button class="act-btn raised-sm" id="copyBtn" disabled
           aria-label="Copier le graphique dans le presse-papier">
@@ -183,7 +201,7 @@
   </div>
 
   <footer class="app-version" aria-label="Version">
-    <span>v1.4.0</span>
+    <span>v1.5.0</span>
     <span class="privacy-badge" aria-label="Confidentialité">
       <span class="privacy-line">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

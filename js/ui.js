@@ -6,6 +6,7 @@
  * and pie chart label toggle.
  */
 import { CSV_PLACEHOLDERS, PALETTES, DEFAULT_PALETTE } from './constants.js';
+import { setRenderTheme } from './canvasCore.js';
 import { parseCSV } from './csv.js';
 import { renderBarresCanvas, renderStackedCanvas, renderGroupedCanvas, renderLineCanvas, canvasToDataURL } from './neumoCanvas.js';
 import { renderPieCanvas } from './pieCanvas.js';
@@ -18,6 +19,7 @@ let lastCanvas    = null;
 let importedName  = null;
 let _debounce     = null;
 let currentLang   = DEFAULT_LANG;
+let darkMode      = false;
 let pieShowLabels = true;
 let compMax       = null;  // null = auto (max des valeurs)
 
@@ -138,6 +140,19 @@ function toggleLang() {
   slider.setAttribute('aria-checked', currentLang === 'en' ? 'true' : 'false');
 }
 
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  setRenderTheme(darkMode);
+  const slider = document.getElementById('themeToggle');
+  if (slider) slider.setAttribute('aria-checked', darkMode ? 'true' : 'false');
+}
+
+function toggleTheme() {
+  darkMode = !darkMode;
+  applyTheme();
+  if (lastCanvas) generate();
+}
+
 export function init() {
   document.querySelectorAll('.type-btn').forEach(btn => {
     btn.addEventListener('click', () => setType(btn.dataset.type, btn));
@@ -154,6 +169,12 @@ export function init() {
   langSlider.addEventListener('click', toggleLang);
   langSlider.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleLang(); }
+  });
+
+  const themeSlider = document.getElementById('themeToggle');
+  themeSlider.addEventListener('click', toggleTheme);
+  themeSlider.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTheme(); }
   });
 
   const pieSlider = document.getElementById('pieLabelsToggle');
@@ -189,6 +210,7 @@ export function init() {
     });
 
   applyLang(currentLang);
+  applyTheme();
   updatePlaceholder(chartType);
   updatePieOptionsVisibility();
   syncPieLabelsSlider();
