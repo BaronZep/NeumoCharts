@@ -105,6 +105,9 @@ python3 -m http.server 8000
 
 ## Changelog
 
+### v1.3.0
+- English language now supported
+
 ### v1.2.2
 - Professional code documentation across all JS modules
 - Copy-to-clipboard fix for Safari (synchronous `ClipboardItem` pattern)

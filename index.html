@@ -32,9 +32,10 @@
 
       <div>
         <div class="section-header">
-          <p class="section-label">Données CSV</p>
+          <p class="section-label" data-i18n="csv-label">Données CSV</p>
           <button class="import-btn raised-sm" id="importBtn"
-            aria-label="Importer un fichier CSV">Importer</button>
+            aria-label="Importer un fichier CSV"
+            data-i18n="import-btn">Importer</button>
           <input type="file" id="fileInput" accept=".csv,.txt" style="display:none"
             aria-hidden="true">
         </div>
@@ -45,30 +46,29 @@
       </div>
 
       <div>
-        <p class="section-label">Type de graphique</p>
+        <p class="section-label" data-i18n="chart-type-label">Type de graphique</p>
         <div class="type-selector" role="radiogroup" aria-label="Type de graphique">
           <button class="type-btn raised-sm active" role="radio" aria-checked="true"
             data-type="barres">
-            <span class="dot"></span>Barres
+            <span class="dot"></span><span data-i18n="type-barres">Barres</span>
           </button>
           <button class="type-btn raised-sm" role="radio" aria-checked="false"
             data-type="stacked">
-            <span class="dot"></span>Barres empilées
+            <span class="dot"></span><span data-i18n="type-stacked">Barres empilées</span>
           </button>
           <button class="type-btn raised-sm" role="radio" aria-checked="false"
             data-type="grouped">
-            <span class="dot"></span>Barres groupées
+            <span class="dot"></span><span data-i18n="type-grouped">Barres groupées</span>
           </button>
           <button class="type-btn raised-sm" role="radio" aria-checked="false"
             data-type="line">
-            <span class="dot"></span>Courbes
+            <span class="dot"></span><span data-i18n="type-line">Courbes</span>
           </button>
         </div>
       </div>
 
-
       <div>
-        <p class="section-label">Couleurs</p>
+        <p class="section-label" data-i18n="colors-label">Couleurs</p>
         <div class="field">
           <div class="field-input inset select-wrap">
             <select id="cfgPalette" aria-label="Choix du nuancier">
@@ -85,28 +85,35 @@
       </div>
 
       <div class="fields">
-        <p class="section-label">Configuration</p>
+        <p class="section-label" data-i18n="config-label">Configuration</p>
         <div class="field">
-          <label for="cfgTitle">Titre du graphique</label>
+          <label for="cfgTitle" data-i18n="title-label">Titre du graphique</label>
           <div class="field-input inset">
-            <input type="text" id="cfgTitle" value="Mon graphique" placeholder="Titre…">
+            <input type="text" id="cfgTitle"
+              data-i18n-placeholder="title-placeholder"
+              placeholder="Titre…">
           </div>
         </div>
         <div class="field">
-          <label for="cfgXTitle">Titre axe X</label>
+          <label for="cfgXTitle" data-i18n="x-label">Titre axe X</label>
           <div class="field-input inset">
-            <input type="text" id="cfgXTitle" placeholder="Axe X">
+            <input type="text" id="cfgXTitle"
+              data-i18n-placeholder="x-placeholder"
+              placeholder="Axe X">
           </div>
         </div>
         <div class="field">
-          <label for="cfgYTitle">Titre axe Y</label>
+          <label for="cfgYTitle" data-i18n="y-label">Titre axe Y</label>
           <div class="field-input inset">
-            <input type="text" id="cfgYTitle" placeholder="Axe Y">
+            <input type="text" id="cfgYTitle"
+              data-i18n-placeholder="y-placeholder"
+              placeholder="Axe Y">
           </div>
         </div>
       </div>
 
-      <button class="gen-btn raised" id="generateBtn">Générer →</button>
+      <button class="gen-btn raised" id="generateBtn"
+        data-i18n="generate-btn">Générer</button>
     </aside>
 
     <main class="preview raised" id="previewPanel" aria-label="Aperçu du graphique">
@@ -118,17 +125,24 @@
             <rect x="21" y="18" width="10" height="28" rx="3"/>
             <rect x="36" y="23" width="10" height="23" rx="3"/>
           </svg>
-          <p>Collez un CSV et cliquez sur Générer</p>
+          <p data-i18n="empty-state">Collez un CSV et cliquez sur Générer</p>
         </div>
       </div>
       <div class="preview-bar">
+        <div class="lang-slider inset" id="langToggle"
+          role="switch" aria-checked="false" tabindex="0"
+          aria-label="Langue / Language">
+          <span class="lang-thumb raised-sm"></span>
+          <span class="lang-label lang-fr">FR</span>
+          <span class="lang-label lang-en">EN</span>
+        </div>
         <button class="act-btn raised-sm" id="copyBtn" disabled
           aria-label="Copier le graphique dans le presse-papier">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2.5">
             <rect x="9" y="9" width="13" height="13" rx="2"/>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>Copier
+          </svg><span data-i18n="copy-btn">Copier</span>
         </button>
         <button class="act-btn raised-sm" id="dlBtn" disabled
           aria-label="Télécharger le graphique en PNG">
@@ -137,20 +151,20 @@
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
             <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>Télécharger PNG
+          </svg><span data-i18n="dl-btn">Télécharger PNG</span>
         </button>
       </div>
     </main>
   </div>
 
   <footer class="app-version" aria-label="Version">
-    <span>v1.2.2</span>
+    <span>v1.3.0</span>
     <span class="privacy-badge" aria-label="Confidentialité">
       <span class="privacy-line">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Aucun serveur, aucun stockage.
+        <span data-i18n="privacy-line1">Aucun serveur, aucun stockage.</span>
       </span>
-      <span>Vos données ne quittent jamais votre appareil.</span>
+      <span data-i18n="privacy-line2">Vos données ne quittent jamais votre appareil.</span>
     </span>
   </footer>
 </div>
