@@ -6,9 +6,9 @@
  */
 import { CSV_PLACEHOLDERS, PALETTES, DEFAULT_PALETTE } from './constants.js';
 import { parseCSV } from './csv.js';
-import { renderHistogramCanvas, renderStackedCanvas, renderGroupedCanvas, renderLineCanvas, canvasToDataURL } from './neumoCanvas.js';
+import { renderBarresCanvas, renderStackedCanvas, renderGroupedCanvas, renderLineCanvas, canvasToDataURL } from './neumoCanvas.js';
 
-let chartType    = 'histogram';
+let chartType    = 'barres';
 let paletteKey   = DEFAULT_PALETTE;
 let lastCanvas   = null;
 let importedName = null; // basename of the last imported CSV file; null when data was typed manually
@@ -73,7 +73,7 @@ export function generate() {
 
   let canvas;
   try {
-    if      (chartType === 'histogram') canvas = renderHistogramCanvas(parsed, cfg);
+    if      (chartType === 'barres') canvas = renderBarresCanvas(parsed, cfg);
     else if (chartType === 'stacked')   canvas = renderStackedCanvas(parsed, cfg);
     else if (chartType === 'line')      canvas = renderLineCanvas(parsed, cfg);
     else                                canvas = renderGroupedCanvas(parsed, cfg);
@@ -93,11 +93,12 @@ export function generate() {
  */
 export function copyPNG() {
   if (!lastCanvas) { showToast("Générez d\'abord un graphique !"); return; }
-  lastCanvas.toBlob(blob => {
-    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-      .then(() => showToast('Copié dans le presse-papier !', true))
-      .catch(() => showToast('Copie non supportée sur ce navigateur.'));
-  });
+  // Safari 17.4+ requires a Promise<Blob> passed directly to ClipboardItem
+  // (synchronous pattern). Chrome/Firefox also support this form.
+  const blobPromise = new Promise(resolve => lastCanvas.toBlob(resolve, 'image/png'));
+  navigator.clipboard.write([new ClipboardItem({ 'image/png': blobPromise })])
+    .then(() => showToast('Copié dans le presse-papier !', true))
+    .catch(() => showToast('Copie non supportée sur ce navigateur.'));
 }
 
 /** Download the last rendered chart as a PNG named after the source CSV or 'manual'. */

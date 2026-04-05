@@ -33,13 +33,12 @@ export const GRP_GAP = 14;  // gap between grouped bar cells
 
 // ── CSV placeholder text (shown when the textarea is empty) ─────────────────
 export const CSV_PLACEHOLDERS = {
-  histogram: `valeur,occurrences
-42,3
-43,7
-44,15
-45,28
-46,22
-47,10`,
+  barres: `categorie,valeur
+Lun,12
+Mar,15
+Mer,9
+Jeu,18
+Ven,7`,
 
   stacked: `axe,serie1,serie2,serie3
 Jan,12,8,5

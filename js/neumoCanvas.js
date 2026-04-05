@@ -5,7 +5,7 @@
  * physical-pixel mapping so the exported PNG is crisp on retina displays.
  *
  * Exported render functions:
- *   renderHistogramCanvas  – single-series bar chart
+ *   renderBarresCanvas      – single-series bar chart
  *   renderStackedCanvas    – multi-series stacked bars
  *   renderGroupedCanvas    – multi-series grouped bars
  *   renderLineCanvas       – multi-series smooth line / area chart
@@ -314,10 +314,10 @@ function buildCanvas(L, cfg, drawContent) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Render a single-series histogram.
+ * Render a single-series bar chart (Barres).
  * CSV format: col0 = X label, col1 = value.
  */
-export function renderHistogramCanvas({ headers, rows }, cfg) {
+export function renderBarresCanvas({ headers, rows }, cfg) {
   const [nomAxe, nomSerie] = headers;
   const palette = cfg.colors || COLORS;
   const color   = palette[0];
