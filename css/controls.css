@@ -159,7 +159,7 @@ textarea.csv-area {
   font-size: 13px;
   border-radius: calc(var(--r-sm) - 2px);
   color: var(--text);
-  background: transparent;
+  background: var(--bg);
   appearance: none;
   -webkit-appearance: none;
 }

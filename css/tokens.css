@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg:   #e6e6ea;
   --surf: #eeedf2;
   --sd:   #c8c8cc;
@@ -29,6 +30,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg:   #191c24;
   --surf: #1f222c;
   --sd:   #11141b;
