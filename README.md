@@ -102,26 +102,3 @@ python3 -m http.server 8000
 | Copy to clipboard | ✅ | ✅ | ✅ 17.4+ |
 
 ---
-
-## Changelog
-
-### v1.3.0
-- English language now supported
-
-### v1.2.2
-- Professional code documentation across all JS modules
-- Copy-to-clipboard fix for Safari (synchronous `ClipboardItem` pattern)
-
-### v1.2.0
-- Copy to clipboard button
-- Output PNG named after imported CSV file
-- Chart title pre-filled from CSV filename on import
-
-### v1.1.0
-- Line / area chart with smooth bezier curves and raised data points
-- Removed label clutter from colour palette selector
-
-### v1.0.0
-- Initial release: Histogram, Stacked bars, Grouped bars
-- 7 colour palettes, neumorphic Canvas 2D rendering
-- PNG export at 2× resolution

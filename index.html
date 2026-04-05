@@ -64,6 +64,21 @@
             data-type="line">
             <span class="dot"></span><span data-i18n="type-line">Courbes</span>
           </button>
+          <button class="type-btn raised-sm" role="radio" aria-checked="false"
+            data-type="pie">
+            <span class="dot"></span><span data-i18n="type-pie">Camembert</span>
+          </button>
+        </div>
+
+        <div id="pieOptions" style="display:none; margin-top:10px;">
+          <p class="section-label" style="margin-bottom:6px;" data-i18n="pie-labels-label">Étiquettes</p>
+          <div class="lang-slider inset" id="pieLabelsToggle"
+            role="switch" aria-checked="true" tabindex="0"
+            aria-label="Afficher les étiquettes">
+            <span class="lang-thumb raised-sm"></span>
+            <span class="lang-label lang-fr" data-i18n="toggle-off">Non</span>
+            <span class="lang-label lang-en" data-i18n="toggle-on">Oui</span>
+          </div>
         </div>
       </div>
 
@@ -158,7 +173,7 @@
   </div>
 
   <footer class="app-version" aria-label="Version">
-    <span>v1.3.0</span>
+    <span>v1.4.0</span>
     <span class="privacy-badge" aria-label="Confidentialité">
       <span class="privacy-line">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

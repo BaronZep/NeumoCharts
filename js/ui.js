@@ -2,19 +2,22 @@
  * ui.js
  * Wires DOM events to chart rendering logic.
  * Manages chart type selection, palette selection, CSV input (paste or file),
- * chart generation, canvas preview, PNG export, and language switching.
+ * chart generation, canvas preview, PNG export, language switching,
+ * and pie chart label toggle.
  */
 import { CSV_PLACEHOLDERS, PALETTES, DEFAULT_PALETTE } from './constants.js';
 import { parseCSV } from './csv.js';
 import { renderBarresCanvas, renderStackedCanvas, renderGroupedCanvas, renderLineCanvas, canvasToDataURL } from './neumoCanvas.js';
+import { renderPieCanvas } from './pieCanvas.js';
 import { t, applyLang, DEFAULT_LANG } from './i18n.js';
 
-let chartType    = 'barres';
-let paletteKey   = DEFAULT_PALETTE;
-let lastCanvas   = null;
-let importedName = null; // basename of the last imported CSV file; null when data was typed manually
-let _debounce    = null; // debounce timer for config field auto-regen
-let currentLang  = DEFAULT_LANG;
+let chartType     = 'barres';
+let paletteKey    = DEFAULT_PALETTE;
+let lastCanvas    = null;
+let importedName  = null;
+let _debounce     = null;
+let currentLang   = DEFAULT_LANG;
+let pieShowLabels = true;
 
 export function showToast(msg, success = false) {
   const el = document.getElementById('toast');
@@ -28,6 +31,22 @@ function updatePlaceholder(type) {
   document.getElementById('csvInput').placeholder = CSV_PLACEHOLDERS[type] ?? '';
 }
 
+function updatePieOptionsVisibility() {
+  const el = document.getElementById('pieOptions');
+  if (el) el.style.display = chartType === 'pie' ? 'block' : 'none';
+}
+
+function syncPieLabelsSlider() {
+  const slider = document.getElementById('pieLabelsToggle');
+  if (slider) slider.setAttribute('aria-checked', pieShowLabels ? 'true' : 'false');
+}
+
+function togglePieLabels() {
+  pieShowLabels = !pieShowLabels;
+  syncPieLabelsSlider();
+  if (lastCanvas && chartType === 'pie') generate();
+}
+
 export function setType(type, btn) {
   chartType = type;
   document.querySelectorAll('.type-btn').forEach(b => {
@@ -37,6 +56,7 @@ export function setType(type, btn) {
   btn.classList.add('active');
   btn.setAttribute('aria-checked', 'true');
   updatePlaceholder(type);
+  updatePieOptionsVisibility();
   if (lastCanvas) generate();
 }
 
@@ -44,10 +64,6 @@ export function setPalette(key) {
   paletteKey = PALETTES[key] ? key : DEFAULT_PALETTE;
 }
 
-/**
- * Read a CSV file from the file input, pre-fill the title field with its
- * basename, and load its content into the textarea.
- */
 export function loadFile(e) {
   const f = e.target.files[0];
   if (!f) return;
@@ -73,6 +89,7 @@ export function generate() {
     yTitle: document.getElementById('cfgYTitle').value.trim(),
     colors:  PALETTES[paletteKey] || PALETTES[DEFAULT_PALETTE],
     palette: paletteKey,
+    pieShowLabels,
   };
 
   let canvas;
@@ -80,6 +97,7 @@ export function generate() {
     if      (chartType === 'barres')  canvas = renderBarresCanvas(parsed, cfg);
     else if (chartType === 'stacked') canvas = renderStackedCanvas(parsed, cfg);
     else if (chartType === 'line')    canvas = renderLineCanvas(parsed, cfg);
+    else if (chartType === 'pie')     canvas = renderPieCanvas(parsed, cfg);
     else                              canvas = renderGroupedCanvas(parsed, cfg);
   } catch (e) { showToast(t('toast-error') + e.message); return; }
 
@@ -91,21 +109,14 @@ export function generate() {
   document.getElementById('copyBtn').disabled = false;
 }
 
-/**
- * Copy the last rendered chart to the system clipboard as a PNG image.
- * Requires a secure context (HTTPS) and browser support for ClipboardItem.
- */
 export function copyPNG() {
   if (!lastCanvas) { showToast(t('toast-no-chart')); return; }
-  // Safari 17.4+ requires a Promise<Blob> passed directly to ClipboardItem
-  // (synchronous pattern). Chrome/Firefox also support this form.
   const blobPromise = new Promise(resolve => lastCanvas.toBlob(resolve, 'image/png'));
   navigator.clipboard.write([new ClipboardItem({ 'image/png': blobPromise })])
     .then(() => showToast(t('toast-copied'), true))
     .catch(() => showToast(t('toast-copy-fail')));
 }
 
-/** Download the last rendered chart as a PNG named after the source CSV or 'manual'. */
 export function downloadPNG() {
   if (!lastCanvas) { showToast(t('toast-no-chart')); return; }
   const a = document.createElement('a');
@@ -114,7 +125,6 @@ export function downloadPNG() {
   a.click();
 }
 
-/** Toggle between FR and EN — updates aria-checked on the slider. */
 function toggleLang() {
   currentLang = currentLang === 'fr' ? 'en' : 'fr';
   applyLang(currentLang);
@@ -133,10 +143,17 @@ export function init() {
   document.getElementById('importBtn').addEventListener('click', () => {
     document.getElementById('fileInput').click();
   });
+
   const langSlider = document.getElementById('langToggle');
   langSlider.addEventListener('click', toggleLang);
   langSlider.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleLang(); }
+  });
+
+  const pieSlider = document.getElementById('pieLabelsToggle');
+  pieSlider.addEventListener('click', togglePieLabels);
+  pieSlider.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePieLabels(); }
   });
 
   const paletteSelect = document.getElementById('cfgPalette');
@@ -148,7 +165,6 @@ export function init() {
     });
   }
 
-  // Titles — auto-regen with 300 ms debounce to avoid re-rendering on every keystroke
   ['cfgTitle', 'cfgXTitle', 'cfgYTitle'].forEach(id => {
     document.getElementById(id).addEventListener('input', () => {
       clearTimeout(_debounce);
@@ -156,13 +172,12 @@ export function init() {
     });
   });
 
-  // Manual edits to the textarea clear the imported filename so the PNG is
-  // saved as 'manual.png' rather than the stale file name.
   document.getElementById('csvInput').addEventListener('input', () => {
     importedName = null;
   });
 
-  // Apply default language and placeholder
   applyLang(currentLang);
   updatePlaceholder(chartType);
+  updatePieOptionsVisibility();
+  syncPieLabelsSlider();
 }
