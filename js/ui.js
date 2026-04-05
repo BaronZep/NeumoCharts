@@ -68,6 +68,8 @@ export function setType(type, btn) {
 
 export function setPalette(key) {
   paletteKey = PALETTES[key] ? key : DEFAULT_PALETTE;
+  updateAccent();
+  updateFavicon();
 }
 
 export function loadFile(e) {
@@ -145,12 +147,34 @@ function applyTheme() {
   setRenderTheme(darkMode);
   const slider = document.getElementById('themeToggle');
   if (slider) slider.setAttribute('aria-checked', darkMode ? 'true' : 'false');
+  updateAccent();
 }
 
 function toggleTheme() {
   darkMode = !darkMode;
   applyTheme();
   if (lastCanvas) generate();
+}
+
+function updateAccent() {
+  const p = PALETTES[paletteKey] || PALETTES[DEFAULT_PALETTE];
+  document.documentElement.style.setProperty('--accent', darkMode ? p[1] : p[0]);
+}
+
+function updateFavicon() {
+  const p = PALETTES[paletteKey] || PALETTES[DEFAULT_PALETTE];
+  const [c1, c2, c3] = [p[0], p[1] || p[0], p[4] || p[2] || p[0]];
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">` +
+    `<rect x="1"  y="17" width="9" height="14" rx="2.5" fill="${c1}"/>` +
+    `<rect x="12" y="9"  width="9" height="22" rx="2.5" fill="${c2}"/>` +
+    `<rect x="23" y="13" width="8" height="18" rx="2.5" fill="${c3}"/>` +
+    `</svg>`;
+  const uri = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  let link = document.querySelector("link[rel~='icon']");
+  if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+  link.type = 'image/svg+xml';
+  link.href = uri;
 }
 
 export function init() {
@@ -211,6 +235,7 @@ export function init() {
 
   applyLang(currentLang);
   applyTheme();
+  updateFavicon();
   updatePlaceholder(chartType);
   updatePieOptionsVisibility();
   syncPieLabelsSlider();
