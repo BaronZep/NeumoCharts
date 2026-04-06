@@ -19,8 +19,9 @@ let lastCanvas    = null;
 let importedName  = null;
 let _debounce     = null;
 let currentLang   = DEFAULT_LANG;
-let darkMode      = false;
-let pieShowLabels = true;
+let darkMode      = window.matchMedia('(prefers-color-scheme: dark)').matches;
+let pieShowLabels    = true;
+let showValueLabels = false;
 let compMax       = null;  // null = auto (max des valeurs)
 
 export function showToast(msg, success = false) {
@@ -36,10 +37,12 @@ function updatePlaceholder(type) {
 }
 
 function updatePieOptionsVisibility() {
-  const elPie  = document.getElementById('pieOptions');
-  const elComp = document.getElementById('compOptions');
-  if (elPie)  elPie.style.display  = chartType === 'pie'         ? 'block' : 'none';
-  if (elComp) elComp.style.display = chartType === 'comparaison' ? 'block' : 'none';
+  const elPie    = document.getElementById('pieOptions');
+  const elComp   = document.getElementById('compOptions');
+  const elLabels = document.getElementById('labelsOptions');
+  if (elPie)    elPie.style.display    = chartType === 'pie'         ? 'block' : 'none';
+  if (elComp)   elComp.style.display   = chartType === 'comparaison' ? 'block' : 'none';
+  if (elLabels) elLabels.style.display = ['pie', 'comparaison'].includes(chartType) ? 'none' : 'block';
 }
 
 function syncPieLabelsSlider() {
@@ -51,6 +54,17 @@ function togglePieLabels() {
   pieShowLabels = !pieShowLabels;
   syncPieLabelsSlider();
   if (lastCanvas && chartType === 'pie') generate();
+}
+
+function syncValueLabelsSlider() {
+  const s = document.getElementById('valueLabelsToggle');
+  if (s) s.setAttribute('aria-checked', showValueLabels ? 'true' : 'false');
+}
+
+function toggleValueLabels() {
+  showValueLabels = !showValueLabels;
+  syncValueLabelsSlider();
+  if (lastCanvas) generate();
 }
 
 export function setType(type, btn) {
@@ -98,6 +112,7 @@ export function generate() {
     colors:  PALETTES[paletteKey] || PALETTES[DEFAULT_PALETTE],
     palette: paletteKey,
     pieShowLabels,
+    showValueLabels,
     compMax: (() => { const v = parseFloat(document.getElementById('compMax')?.value); return v > 0 ? v : null; })(),
   };
 
@@ -233,9 +248,18 @@ export function init() {
       _debounce = setTimeout(() => { if (lastCanvas && chartType === 'comparaison') generate(); }, 300);
     });
 
+  const labelsSlider = document.getElementById('valueLabelsToggle');
+  if (labelsSlider) {
+    labelsSlider.addEventListener('click', toggleValueLabels);
+    labelsSlider.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleValueLabels(); }
+    });
+  }
+
   applyLang(currentLang);
   applyTheme();
   updateFavicon();
+  updatePieOptionsVisibility();
   updatePlaceholder(chartType);
   updatePieOptionsVisibility();
   syncPieLabelsSlider();

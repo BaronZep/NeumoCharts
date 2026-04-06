@@ -46,6 +46,9 @@ export const TRANSLATIONS = {
     'toast-error':          'Erreur : ',
     // Default chart title
     'default-title':        'Mon graphique',
+    'theme-toggle-label':   "Mode d'affichage",
+    'value-labels-label':   'Valeurs',
+    'value-labels-toggle':  'Afficher les valeurs',
   },
   en: {
     // Sidebar
@@ -86,6 +89,9 @@ export const TRANSLATIONS = {
     'toast-error':          'Error: ',
     // Default chart title
     'default-title':        'My chart',
+    'theme-toggle-label':   'Display mode',
+    'value-labels-label':   'Values',
+    'value-labels-toggle':  'Show values',
   },
 };
 
@@ -118,5 +124,9 @@ export function applyLang(lang) {
 
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel));
   });
 }

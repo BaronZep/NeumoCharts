@@ -7,7 +7,7 @@ import {
   RT, SD, TC, RAIL_H,
   FONT, PAD, GAP, ZPPAD, SPAD,
   hex2rgba, neumoInset, drawBar, drawGrid, drawYAxis,
-  calcLayout, buildCanvas, canvasToDataURL,
+  calcLayout, buildCanvas, canvasToDataURL, drawValueLabel,
 } from './canvasCore.js';
 import { niceIntTicks, fmtX } from './utils.js';
 
@@ -81,7 +81,10 @@ export function renderBarresCanvas({ headers, rows }, cfg) {
       const cx = ox + i * L.CELL_W + L.CELL_W / 2;
       neumoInset(ctx, cx - L.BAR_W / 2, oy, L.BAR_W, RAIL_H, 10);
       const bH = Math.max(0, (d.v / span) * (RAIL_H - 6));
-      if (bH > 0) drawBar(ctx, cx - L.BAR_W * 0.65 / 2, oy + RAIL_H - bH - 3, L.BAR_W * 0.65, bH, color, [6, 6, 6, 6]);
+      if (bH > 0) {
+        drawBar(ctx, cx - L.BAR_W * 0.65 / 2, oy + RAIL_H - bH - 3, L.BAR_W * 0.65, bH, color, [6, 6, 6, 6]);
+        if (cfg.showValueLabels) drawValueLabel(ctx, Math.round(d.v), cx, oy + RAIL_H - bH - 3);
+      }
     });
   });
 }
@@ -113,6 +116,10 @@ export function renderStackedCanvas({ headers, rows }, cfg) {
         if (bH > 0) drawBar(ctx, bX, bY, bW, bH, colors[si], r);
         botH += bH;
       });
+      if (cfg.showValueLabels && botH > 3) {
+        const total = d.values.reduce((a, b) => a + b, 0);
+        drawValueLabel(ctx, Math.round(total), cx, oy + RAIL_H - botH - 3);
+      }
     });
   });
 }
@@ -156,7 +163,10 @@ export function renderGroupedCanvas({ headers, rows }, cfg) {
         const bH = Math.abs(v) / span * (RAIL_H - 6);
         const bX = gx + si * (BW + BGAP);
         const bY = v >= 0 ? oy + RAIL_H - zeroPct * (RAIL_H - 6) - bH - 3 : oy + RAIL_H - zeroPct * (RAIL_H - 6) - 3;
-        if (bH > 0) drawBar(ctx, bX, bY, BW, bH, colors[si], [7, 7, 7, 7]);
+        if (bH > 0) {
+          drawBar(ctx, bX, bY, BW, bH, colors[si], [7, 7, 7, 7]);
+          if (cfg.showValueLabels) drawValueLabel(ctx, Math.round(v), bX + BW / 2, v >= 0 ? bY : bY + bH + 16);
+        }
       });
     });
   });
@@ -199,5 +209,10 @@ export function renderLineCanvas({ headers, rows }, cfg) {
     allPts.forEach((pts, si) => drawLineArea(ctx, pts, colors[si], oy));
     allPts.forEach((pts, si) => drawLineStroke(ctx, pts, colors[si]));
     allPts.forEach((pts, si) => drawLinePoints(ctx, pts, colors[si]));
+    if (cfg.showValueLabels) {
+      allPts.forEach((pts, si) =>
+        pts.forEach(({ x, y }, i) => drawValueLabel(ctx, Math.round(seriesData[si][i].v), x, y))
+      );
+    }
   });
 }

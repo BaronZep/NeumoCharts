@@ -12,6 +12,13 @@
 <link rel="stylesheet" href="./css/controls.css">
 <link rel="stylesheet" href="./css/preview.css">
 <link rel="stylesheet" href="./css/chart.css">
+  <!-- Instant dark mode: runs before CSS renders, prevents flash -->
+  <script>
+    (function(){
+      var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+  </script>
 </head>
 <body>
 <div class="app">
@@ -79,6 +86,16 @@
           <div class="lang-slider inset" id="pieLabelsToggle"
             role="switch" aria-checked="true" tabindex="0"
             aria-label="Afficher les étiquettes">
+            <span class="lang-thumb raised-sm"></span>
+            <span class="lang-label lang-fr" data-i18n="toggle-off">Non</span>
+            <span class="lang-label lang-en" data-i18n="toggle-on">Oui</span>
+          </div>
+        </div>
+        <div id="labelsOptions" style="margin-top:10px;">
+          <p class="section-label" style="margin-bottom:6px;" data-i18n="value-labels-label">Valeurs</p>
+          <div class="lang-slider inset" id="valueLabelsToggle"
+               role="switch" aria-checked="false" tabindex="0"
+               data-i18n-aria-label="value-labels-toggle">
             <span class="lang-thumb raised-sm"></span>
             <span class="lang-label lang-fr" data-i18n="toggle-off">Non</span>
             <span class="lang-label lang-en" data-i18n="toggle-on">Oui</span>
@@ -164,7 +181,7 @@
           </div>
           <div class="theme-slider inset" id="themeToggle"
             role="switch" aria-checked="false" tabindex="0"
-            aria-label="Mode sombre / Dark mode">
+            data-i18n-aria-label="theme-toggle-label">
             <span class="theme-thumb raised-sm"></span>
             <span class="theme-label theme-light" aria-hidden="true">
               <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -201,7 +218,7 @@
   </div>
 
   <footer class="app-version" aria-label="Version">
-    <span>v1.4.0</span>
+    <span>v1.5.0</span>
     <span class="privacy-badge" aria-label="Confidentialité">
       <span class="privacy-line">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

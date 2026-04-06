@@ -237,6 +237,17 @@ export function buildCanvas(L, cfg, drawContent) {
   return C;
 }
 
+/** Draw a small value label centred above (x, y). */
+export function drawValueLabel(ctx, text, x, y) {
+  ctx.save();
+  ctx.font = `700 ${FS_YAXIS}px "${FONT}",sans-serif`;
+  ctx.fillStyle = RT.TC;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(String(text), x, y - 4);
+  ctx.restore();
+}
+
 export function canvasToDataURL(canvas) {
   return canvas.toDataURL('image/png');
 }

@@ -38,3 +38,11 @@ h1, h2, h3 { text-wrap: balance; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Smooth theme transitions ───────────────────────────────────────────── */
+body, .raised, .raised-sm, .inset, .panel,
+.app-header, header, aside, main, footer,
+.field input, .field select, textarea,
+.toast, .select-wrap, .type-btn, .act-btn, .gen-btn, .import-btn {
+  transition: background-color 220ms ease, color 220ms ease;
+}
