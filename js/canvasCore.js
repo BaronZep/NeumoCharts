@@ -224,7 +224,7 @@ export function buildCanvas(L, cfg, drawContent) {
   neumoRaised(ctx, zX, zY, L.zoneW, L.zoneH, 18, 8, 8, 18);
 
   const ox = zX + ZPPAD + (L.yTtlW || 0) + Y_AX_W;
-  const oy = zY + ZPPAD;
+  const oy = zY + ZPPAD + (L._topPad || 0);
 
   if (cfg.yTitle && L.yTtlW) drawYTitle(ctx, cfg.yTitle, zX + ZPPAD + L.yTtlW / 2, oy + RAIL_H / 2);
 
