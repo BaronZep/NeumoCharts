@@ -50,49 +50,20 @@ export const GRP_GAP = 14;  // gap between grouped bar cells
 
 // ── CSV placeholder text (shown when the textarea is empty) ─────────────────
 export const CSV_PLACEHOLDERS = {
-  barres: `categorie,valeur
-Lun,12
-Mar,15
-Mer,9
-Jeu,18
-Ven,7`,
-
-  stacked: `axe,serie1,serie2,serie3
-Jan,12,8,5
-Fév,15,10,7
-Mar,9,14,6
-Avr,18,11,9`,
-
-  grouped: `axe,serie1,serie2
-Lun,12,8
-Mar,15,10
-Mer,9,14
-Jeu,18,11
-Ven,7,13`,
-
-  line: `mois,Bordeaux,Champagne,Loire
-Jan,42,55,33
-Fév,48,62,37
-Mar,61,71,44
-Avr,74,68,55
-Mai,88,74,66
-Jun,95,79,72
-Jul,91,76,69
-Aoû,87,72,65
-Sep,79,82,60
-Oct,68,91,51
-Nov,53,74,42
-Déc,45,68,36`,
-
-  pie: `categorie,valeur
-Marketing,42
-Tech,28
-RH,15
-Finance,20`,
-
-  comparaison: `serie,valeur
-Produit A,82
-Produit B,64
-Produit C,91
-Produit D,47`,
+  fr: {
+    barres:     `categorie,valeur\nLun,12\nMar,15\nMer,9\nJeu,18\nVen,7`,
+    stacked:    `axe,serie1,serie2,serie3\nJan,12,8,5\nFév,15,10,7\nMar,9,14,6\nAvr,18,11,9`,
+    grouped:    `axe,serie1,serie2\nLun,12,8\nMar,15,10\nMer,9,14\nJeu,18,11\nVen,7,13`,
+    line:       `mois,Bordeaux,Champagne,Loire\nJan,42,55,33\nFév,48,62,37\nMar,61,71,44\nAvr,74,68,55\nMai,88,74,66\nJun,95,79,72\nJul,91,76,69\nAoû,87,72,65\nSep,79,82,60\nOct,68,91,51\nNov,53,74,42\nDéc,45,68,36`,
+    pie:        `categorie,valeur\nMarketing,42\nTech,28\nRH,15\nFinance,20`,
+    comparaison:`serie,valeur\nProduit A,82\nProduit B,64\nProduit C,91\nProduit D,47`,
+  },
+  en: {
+    barres:     `category,value\nMon,12\nTue,15\nWed,9\nThu,18\nFri,7`,
+    stacked:    `axis,series1,series2,series3\nJan,12,8,5\nFeb,15,10,7\nMar,9,14,6\nApr,18,11,9`,
+    grouped:    `axis,series1,series2\nMon,12,8\nTue,15,10\nWed,9,14\nThu,18,11\nFri,7,13`,
+    line:       `month,Bordeaux,Champagne,Loire\nJan,42,55,33\nFeb,48,62,37\nMar,61,71,44\nApr,74,68,55\nMay,88,74,66\nJun,95,79,72\nJul,91,76,69\nAug,87,72,65\nSep,79,82,60\nOct,68,91,51\nNov,53,74,42\nDec,45,68,36`,
+    pie:        `category,value\nMarketing,42\nTech,28\nHR,15\nFinance,20`,
+    comparaison:`series,value\nProduct A,82\nProduct B,64\nProduct C,91\nProduct D,47`,
+  },
 };

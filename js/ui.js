@@ -33,7 +33,8 @@ export function showToast(msg, success = false) {
 }
 
 function updatePlaceholder(type) {
-  document.getElementById('csvInput').placeholder = CSV_PLACEHOLDERS[type] ?? '';
+  const dict = CSV_PLACEHOLDERS[currentLang] || CSV_PLACEHOLDERS.fr;
+  document.getElementById('csvInput').placeholder = dict[type] ?? '';
 }
 
 function updatePieOptionsVisibility() {
@@ -155,6 +156,7 @@ function toggleLang() {
   applyLang(currentLang);
   const slider = document.getElementById('langToggle');
   slider.setAttribute('aria-checked', currentLang === 'en' ? 'true' : 'false');
+  updatePlaceholder(chartType);
 }
 
 function applyTheme() {
