@@ -18,7 +18,9 @@ let paletteKey    = DEFAULT_PALETTE;
 let lastCanvas    = null;
 let importedName  = null;
 let _debounce     = null;
-let currentLang   = DEFAULT_LANG;
+const _browserLang = (navigator.language || navigator.userLanguage || 'fr')
+  .slice(0, 2).toLowerCase();
+let currentLang = _browserLang === 'fr' ? 'fr' : 'en';
 let darkMode      = window.matchMedia('(prefers-color-scheme: dark)').matches;
 let pieShowLabels    = true;
 let showValueLabels = false;
