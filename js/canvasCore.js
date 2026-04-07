@@ -126,6 +126,15 @@ export function drawYAxis(ctx, ticks, axMin, span, ox, oy, barsW) {
     ctx.fillText(Math.round(tv), ox - 4, yy);
     ctx.restore();
   }
+  // Label "0" sur la ligne zéro uniquement quand il y a des valeurs négatives
+  if (axMin < -0.001) {
+    const zeroY = oy + RAIL_H - (-axMin / span) * RAIL_H;
+    ctx.save();
+    ctx.font = `600 ${FS_YAXIS}px "${FONT}",sans-serif`;
+    ctx.fillStyle = RT.TC; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText('0', ox - 4, zeroY);
+    ctx.restore();
+  }
 }
 
 export function drawXLabels(ctx, labels, CELL_W, ox, oy) {

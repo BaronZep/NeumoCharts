@@ -123,22 +123,30 @@ export function renderBarresCanvas({ headers, rows }, cfg) {
   const [nomAxe, nomSerie] = headers;
   const color = (cfg.colors || COLORS)[0];
   const data = rows.map(r => ({ x: r[nomAxe], v: parseFloat(r[nomSerie]) || 0 }));
-  const maxV = Math.max(...data.map(d => d.v), 0);
-  const ticks = niceIntTicks(0, maxV, Y_TICKS);
+  const allV_b = data.map(d => d.v);
+  const minV_b = Math.min(...allV_b, 0);
+  const maxV_b = Math.max(...allV_b, 0);
+  const ticks = niceIntTicks(minV_b, maxV_b, Y_TICKS);
   const axMin = ticks[0], axMax = ticks[ticks.length - 1], span = axMax - axMin || 1;
+  const zeroPctB = -axMin / span;
 
   const L = calcLayout(data.length, !!cfg.yTitle, !!cfg.xTitle, false);
   L._xLabels = data.map(d => fmtX(d.x));
 
   return buildCanvas(L, cfg, (ctx, ox, oy) => {
     drawYAxis(ctx, ticks, axMin, span, ox, oy, L.barsW);
+    const zeroYB = oy + RAIL_H - zeroPctB * (RAIL_H - 6) - 3;
+    drawGrid(ctx, ox, zeroYB, L.barsW, 0.35);
     data.forEach((d, i) => {
       const cx = ox + i * L.CELL_W + L.CELL_W / 2;
       neumoInset(ctx, cx - L.BAR_W / 2, oy, L.BAR_W, RAIL_H, 10);
-      const bH = Math.max(0, (d.v / span) * (RAIL_H - 6));
+      const bH = Math.abs(d.v) / span * (RAIL_H - 6);
+      const bX = cx - L.BAR_W * 0.65 / 2;
+      const bY = d.v >= 0 ? zeroYB - bH : zeroYB;
+      const bR = d.v >= 0 ? [6, 6, 0, 0] : [0, 0, 6, 6];
       if (bH > 0) {
-        drawBar(ctx, cx - L.BAR_W * 0.65 / 2, oy + RAIL_H - bH - 3, L.BAR_W * 0.65, bH, color, [6, 6, 6, 6]);
-        if (cfg.showValueLabels) drawValueLabel(ctx, Math.round(d.v), cx, oy + RAIL_H - bH - 3);
+        drawBar(ctx, bX, bY, L.BAR_W * 0.65, bH, color, bR);
+        if (cfg.showValueLabels) drawValueLabel(ctx, Math.round(d.v), cx, d.v >= 0 ? bY : bY + bH + 16);
       }
     });
   });
@@ -150,8 +158,10 @@ export function renderStackedCanvas({ headers, rows }, cfg) {
   const colors = series.map((_, i) => palette[i % palette.length]);
   const BAR_W = Math.max(28, Math.min(56, Math.floor(700 / rows.length)));
   const data = rows.map(r => ({ x: r[nomAxe], values: series.map(s => parseFloat(r[s]) || 0) }));
-  const maxTot = Math.max(...data.map(d => d.values.reduce((a, b) => a + b, 0)), 0);
-  const ticks = niceIntTicks(0, maxTot, Y_TICKS);
+  const totals = data.map(d => d.values.reduce((a, b) => a + b, 0));
+  const minTot = Math.min(...totals, 0);
+  const maxTot = Math.max(...totals, 0);
+  const ticks = niceIntTicks(minTot, maxTot, Y_TICKS);
   const axMin = ticks[0], axMax = ticks[ticks.length - 1], span = axMax - axMin || 1;
 
   const L = calcLayout(data.length, !!cfg.yTitle, !!cfg.xTitle, true, series.length, BAR_W);
@@ -164,7 +174,7 @@ export function renderStackedCanvas({ headers, rows }, cfg) {
       neumoInset(ctx, cx - L.BAR_W / 2, oy, L.BAR_W, RAIL_H, 10);
       let botH = 3;
       d.values.forEach((v, si) => {
-        const bH = Math.max(0, (v / span) * (RAIL_H - 6));
+        const bH = Math.abs(v) / span * (RAIL_H - 6);
         const bW = L.BAR_W * 0.65, bX = cx - bW / 2, bY = oy + RAIL_H - botH - bH;
         const isTop = si === series.length - 1, isBot = si === 0;
         const r = (isBot && isTop) ? [8,8,8,8] : isTop ? [8,8,0,0] : isBot ? [0,0,8,8] : [0,0,0,0];
@@ -234,8 +244,9 @@ export function renderLineCanvas({ headers, rows }, cfg) {
 
   const seriesData = series.map(s => rows.map(r => ({ x: r[nomAxe], v: parseFloat(r[s]) || 0 })));
   const allVals = seriesData.flat().map(d => d.v);
-  const maxV = Math.max(...allVals, 0);
-  const ticks = niceIntTicks(0, maxV, Y_TICKS);
+  const minV_l = Math.min(...allVals, 0);
+  const maxV_l = Math.max(...allVals, 0);
+  const ticks = niceIntTicks(minV_l, maxV_l, Y_TICKS);
   const axMin = ticks[0], axMax = ticks[ticks.length - 1], span = axMax - axMin || 1;
 
   const n = rows.length;
@@ -264,7 +275,7 @@ export function renderLineCanvas({ headers, rows }, cfg) {
 
     const allPts = seriesData.map(sd => sd.map((d, i) => ({
       x: ox + i * L.CELL_W + L.CELL_W / 2,
-      y: oy + RAIL_H - Math.max(0, (d.v - axMin) / span) * (RAIL_H - 6) - 3,
+      y: oy + RAIL_H - ((d.v - axMin) / span) * (RAIL_H - 6) - 3,
     })));
 
     allPts.forEach((pts, si) => drawCarvedChannel(ctx, pts, colors[si]));
