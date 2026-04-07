@@ -18,9 +18,8 @@ let paletteKey    = DEFAULT_PALETTE;
 let lastCanvas    = null;
 let importedName  = null;
 let _debounce     = null;
-const _browserLang = (navigator.language || navigator.userLanguage || 'fr')
-  .slice(0, 2).toLowerCase();
-let currentLang = _browserLang === 'fr' ? 'fr' : 'en';
+const _browserLang = (navigator.language || navigator.userLanguage || 'fr').slice(0, 2).toLowerCase();
+let currentLang   = _browserLang === 'fr' ? 'fr' : 'en';
 let darkMode      = window.matchMedia('(prefers-color-scheme: dark)').matches;
 let pieShowLabels    = true;
 let showValueLabels = false;
@@ -261,6 +260,9 @@ export function init() {
   }
 
   applyLang(currentLang);
+  // Sync toggle visuel avec la langue détectée
+  const _ls = document.getElementById('langToggle');
+  if (_ls) _ls.setAttribute('aria-checked', currentLang === 'en' ? 'true' : 'false');
   applyTheme();
   updateFavicon();
   updatePieOptionsVisibility();

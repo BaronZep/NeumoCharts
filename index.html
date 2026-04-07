@@ -19,6 +19,17 @@
       if (dark) document.documentElement.setAttribute('data-theme', 'dark');
     })();
   </script>
+  <script>
+    (function(){
+      var lang = (navigator.language || navigator.userLanguage || 'fr').slice(0,2).toLowerCase();
+      if (lang !== 'fr') {
+        document.addEventListener('DOMContentLoaded', function(){
+          var t = document.getElementById('langToggle');
+          if (t) t.setAttribute('aria-checked','true');
+        });
+      }
+    })();
+  </script>
 </head>
 <body>
 <div class="app">
